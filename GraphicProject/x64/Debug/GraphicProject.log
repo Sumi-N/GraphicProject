@@ -1,2 +1,2 @@
 ﻿  Source.cpp
-  GraphicProject.vcxproj -> C:\Users\sumil\source\repos\GraphicProject\x64\Debug\GraphicProject.exe
+c:\users\sumil\source\repos\graphicproject\graphicproject\source.cpp(49): error C4700: uninitialized local variable 'pipe' used
