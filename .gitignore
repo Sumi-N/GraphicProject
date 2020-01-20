@@ -27,5 +27,5 @@
 *.out
 *.app
 
-!APIs/*
-!Objfiles/*
+!APIs/**
+!Objfiles/**
