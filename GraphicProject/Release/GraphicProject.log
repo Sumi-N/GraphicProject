@@ -1,11 +1,1 @@
-﻿  Source.cpp
-Source.obj : error LNK2001: unresolved external symbol _glfwSwapBuffers
-Source.obj : error LNK2001: unresolved external symbol __imp__glClear@4
-Source.obj : error LNK2001: unresolved external symbol _glfwTerminate
-Source.obj : error LNK2001: unresolved external symbol _glfwInit
-Source.obj : error LNK2001: unresolved external symbol _glfwCreateWindow
-Source.obj : error LNK2001: unresolved external symbol _glfwMakeContextCurrent
-Source.obj : error LNK2001: unresolved external symbol __imp__glClearColor@16
-Source.obj : error LNK2001: unresolved external symbol _glfwWaitEvents
-Source.obj : error LNK2001: unresolved external symbol _glfwWindowShouldClose
-C:\Users\sumil\source\repos\GraphicProject\Release\GraphicProject.exe : fatal error LNK1120: 9 unresolved externals
+﻿  GraphicProject.vcxproj -> F:\SchoolStuff\GraphicProject\Release\GraphicProject.exe

@@ -129,7 +129,7 @@ int main()
 
 	//Vertex shader pipeline?	
 	cy::TriMesh data;
-	data.LoadFromFileObj("teapot.obj", true);
+	data.LoadFromFileObj("../Objfiles/teapot.obj", true);
 	GLuint VBO;
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
