@@ -1,11 +1,16 @@
-﻿#include "math_3d.h"
-#include "cyCodeBase/cyTriMesh.h"
+﻿#include "cyCodeBase/cyTriMesh.h"
 
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#include "Source.h"
+#include "Input.h"
+
+GLFWwindow * window;
 
 // シェーダオブジェクトのコンパイル結果を表示する
 // shader: シェーダオブジェクト名
@@ -109,7 +114,7 @@ int main()
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Creating a window
-	GLFWwindow *const window(glfwCreateWindow(1000, 1000, "Hello!", NULL, NULL));
+	window = glfwCreateWindow(800, 800, "Interactive Graphics", NULL, NULL);
 	if (window == NULL)
 	{
 		// ウィンドウが作成できなかった
@@ -168,6 +173,9 @@ int main()
 		"}\n";
 	// プログラムオブジェクトを作成する
 	const GLuint program(createProgram(vsrc, fsrc));
+
+	// Sets up a key callback
+	glfwSetKeyCallback(window, Input::key_callback);
 
 
 	// ウィンドウが開いている間繰り返す
