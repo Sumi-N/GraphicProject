@@ -77,9 +77,18 @@
     <ClInclude Include="math_3d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sumiMatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChangeWindowSize.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="point.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="point.vert">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

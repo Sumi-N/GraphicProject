@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -22,6 +22,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChangeWindowSize.h" />
     <ClInclude Include="cyCodeBase\cyAlphaDistribution.h" />
     <ClInclude Include="cyCodeBase\cyBVH.h" />
     <ClInclude Include="cyCodeBase\cyColor.h" />
@@ -41,9 +42,11 @@
     <ClInclude Include="cyCodeBase\cyTimer.h" />
     <ClInclude Include="cyCodeBase\cyTriMesh.h" />
     <ClInclude Include="math_3d.h" />
+    <ClInclude Include="sumiMatrix.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="point.frag" />
+    <None Include="point.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

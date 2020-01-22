@@ -1,8 +1,11 @@
 ﻿#include "math_3d.h"
 #include "cyCodeBase/cyTriMesh.h"
+#include "sumiMatrix.h"
+#include "ChangeWindowSize.h"
 
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -89,6 +92,56 @@ GLuint createProgram(const char *vsrc, const char *fsrc)
 	return 0;
 }
 
+// シェーダのソースファイルを読み込んだメモリを返す
+// name: シェーダのソースファイル名
+// buffer: 読み込んだソースファイルのテキスト
+bool readShaderSource(const char *name, std::vector<GLchar> &buffer)
+{
+	// ファイル名が NULL だった
+	if (name == NULL) return false;
+	// ソースファイルを開く
+	std::ifstream file(name, std::ios::binary);
+	if (file.fail())
+	{
+		// 開けなかった
+		std::cerr << "Error: Can't open source file: " << name << std::endl;
+		return false;
+	}
+	// ファイルの末尾に移動し現在位置（＝ファイルサイズ）を得る
+	file.seekg(0L, std::ios::end);
+	GLsizei length = static_cast<GLsizei>(file.tellg());
+	// ファイルサイズのメモリを確保
+	buffer.resize(length + 1);
+	// ファイルを先頭から読み込む
+	file.seekg(0L, std::ios::beg);
+	file.read(buffer.data(), length);
+	buffer[length] = '\0';
+	if (file.fail())
+	{
+		// うまく読み込めなかった
+		std::cerr << "Error: Could not read souce file: " << name << std::endl;
+		file.close();
+		return false;
+	}
+	// 読み込み成功
+	file.close();
+	return true;
+}
+
+// シェーダのソースファイルを読み込んでプログラムオブジェクトを作成する
+// vert: バーテックスシェーダのソースファイル名
+// frag: フラグメントシェーダのソースファイル名
+GLuint loadProgram(const char *vert, const char *frag)
+{
+	// シェーダのソースファイルを読み込む
+	std::vector<GLchar> vsrc;
+	const bool vstat(readShaderSource(vert, vsrc));
+	std::vector<GLchar> fsrc;
+	const bool fstat(readShaderSource(frag, fsrc));
+	// プログラムオブジェクトを作成する
+	return vstat && fstat ? createProgram(vsrc.data(), fsrc.data()) : 0;
+}
+
 int main()
 {
 	// Initialize GLFW
@@ -108,24 +161,7 @@ int main()
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// Creating a window
-	GLFWwindow *const window(glfwCreateWindow(1000, 1000, "Hello!", NULL, NULL));
-	if (window == NULL)
-	{
-		// ウィンドウが作成できなかった
-		std::cerr << "Can't create GLFW window." << std::endl;
-		glfwTerminate();
-		return 1;
-	}
-	// 作成したウィンドウを OpenGL の処理対象にする
-	glfwMakeContextCurrent(window);
-
-	// Initialize GLEW
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		std::cerr << "Can't initialize GLEW" << std::endl;
-		return 1;
-	}
+	Window window;
 
 	//Vertex shader pipeline?	
 	cy::TriMesh data;
@@ -133,7 +169,8 @@ int main()
 	GLuint VBO;
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, data.NVN() * sizeof(data.VN(0)), &data.VN(0), GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, data.NVN() * sizeof(data.VN(0)), &data.VN(0), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, data.NV() * sizeof(data.V(0)), &data.V(0), GL_STATIC_DRAW);
 	//std::cout << data.NV() * sizeof(data.V(0)) << std::endl;
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -143,48 +180,33 @@ int main()
 	//glGenVertexArrays(1, &vao);
 	//glBindVertexArray(vao);
 
-	// The timing to wait for V-Sync
-	glfwSwapInterval(1);
-
 	// 背景色を指定する
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// バーテックスシェーダのソースプログラム
-	static constexpr GLchar vsrc[] =
-		"#version 150 core\n"
-		"in vec4 position;\n"
-		"void main()\n"
-		"{\n"
-		" float s = 1.0;\n"
-		" gl_Position = s * position;\n"
-		"}\n";
-	// フラグメントシェーダのソースプログラム
-	static constexpr GLchar fsrc[] =
-		"#version 150 core\n"
-		"out vec4 fragment;\n"
-		"void main()\n"
-		"{\n"
-		" fragment = vec4(1.0, 1.0, 0.0, 1.0);\n"
-		"}\n";
-	// プログラムオブジェクトを作成する
-	const GLuint program(createProgram(vsrc, fsrc));
-
+	//Read file and create pipeline
+	const GLuint program(loadProgram("point.vert","point.frag"));
+	//Get uniform variable location
+	//const GLint modelLoc(glGetUniformLocation(program, "model"));
+	const GLint aspectLoc(glGetUniformLocation(program, "aspect"));
 
 	// ウィンドウが開いている間繰り返す
-	while (glfwWindowShouldClose(window) == GL_FALSE)
+	while (window.shouldClose() == GL_FALSE)
 	{
 		// ウィンドウを消去する
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// シェーダプログラムの使用開始
 		glUseProgram(program);
+
+		//Setting uniform variables
+		glUniform1f(aspectLoc, window.getAspect());
 		
 		// ここで描画処理を行う
 		//glDrawArrays(GL_POINTS, 0, data.NV());
-		glDrawArrays(GL_POINTS, 0, data.NVN());
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, data.NV());
 		//
 		// カラーバッファを入れ替える
-		glfwSwapBuffers(window);
+		window.swapBuffers();
 		// イベントを取り出す
 		glfwWaitEvents();
 	}
