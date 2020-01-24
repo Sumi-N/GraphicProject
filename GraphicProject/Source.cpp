@@ -13,17 +13,8 @@
 #include "FileLoader.h"
 #include "Input.h"
 
-struct  MVPmatrix
-{
-	Matrix4f mvp;
-	Matrix4f model;
-	Matrix4f view;
-	Matrix4f perspective;
-};
-
 GLFWwindow * window;
 cy::TriMesh data;
-MVPmatrix mvpmatrix;
 GLuint program;
 
 int main()
@@ -70,23 +61,17 @@ int main()
 	GLuint VBO;
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, data.NVN() * sizeof(data.VN(0)), &data.VN(0), GL_STATIC_DRAW);
-	//glBufferData(GL_ARRAY_BUFFER, data.NV() * sizeof(data.V(0)), &data.V(0), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, data.NV() * sizeof(data.V(0)), &data.V(0), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
 
-	mvpmatrix.model.InitIdentity();
-	mvpmatrix.view.InitIdentity();
-	mvpmatrix.perspective.InitIdentity();
-	mvpmatrix.mvp = mvpmatrix.model * mvpmatrix.view * mvpmatrix.perspective;
-
-	//GLuint UBO;
-	//glGenBuffers(1, &UBO);
-	//glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-	//glBufferData(GL_UNIFORM_BUFFER, sizeof(Matrix4f), &mvpmatrix, GL_DYNAMIC_DRAW);
-	//glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	GLuint IndexBuffer;
+	glGenBuffers(1, &IndexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.NF() * sizeof(data.F(0)), &data.F(0), GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
 
 
 	// The timing to wait for V-Sync
@@ -103,17 +88,14 @@ int main()
 	}
 	GLfloat matrix[16] = 
 	{
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
+		0.05f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.05f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.05f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f,
 	};
 
-	// Sets up a key callback
 	glfwSetKeyCallback(window, Input::keyCallback);
 
-
-	// ウィンドウが開いている間繰り返す
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
 		// clear window
@@ -123,10 +105,8 @@ int main()
 		glUseProgram(program);
 		
 		// Draw call
-		//glDrawArrays(GL_POINTS, 0, data.NV());
 		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, matrix);
-		glDrawArrays(GL_POINTS, 0, data.NVN());
-		//glDrawArrays(GL_TRIANGLE_STRIP, 0, data.NV());
+		glDrawElements(GL_TRIANGLES, data.NF() * sizeof(data.F(0)), GL_UNSIGNED_INT, (void*)0);
 
 		glfwSwapBuffers(window);
 		// call callback
