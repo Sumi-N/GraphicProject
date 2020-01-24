@@ -86,6 +86,9 @@
     <ClInclude Include="math_3d.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="point.vert">

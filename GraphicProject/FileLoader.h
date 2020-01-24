@@ -3,10 +3,6 @@
 #include <iostream>
 #include <fstream>
 
-//GLuint createProgram(const char * vsrc, const char *fsrc);
-GLboolean printShaderInfoLog(GLuint shader, const char* str);
-GLboolean printProgramInfoLog(GLuint program);
-
 namespace FileLoader
 {
 	bool readShaderSource(const char *name, std::vector<GLchar> &buffer)
@@ -52,7 +48,7 @@ namespace FileLoader
 			glShaderSource(vobj, 1, &vertscr, NULL);
 			glCompileShader(vobj);
 
-			if (printShaderInfoLog(vobj, "vertex shader"))
+			if (Utiliti::printShaderInfoLog(vobj, "vertex shader"))
 			{
 				glAttachShader(program, vobj);
 			}
@@ -65,7 +61,7 @@ namespace FileLoader
 			glShaderSource(fobj, 1, &fragsrc, NULL);
 			glCompileShader(fobj);
 
-			if (printShaderInfoLog(fobj, "fragment shader"))
+			if (Utiliti::printShaderInfoLog(fobj, "fragment shader"))
 			{
 				glAttachShader(program, fobj);
 			}
@@ -73,10 +69,11 @@ namespace FileLoader
 		}
 
 		glBindAttribLocation(program, 0, "position");
+		glBindAttribLocation(program, 1, "color");
 		glBindFragDataLocation(program, 0, "fragment");
 		glLinkProgram(program);
 
-		if (printProgramInfoLog(program))
+		if (Utiliti::printProgramInfoLog(program))
 		{
 			return program;
 		}
