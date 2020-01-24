@@ -40,12 +40,14 @@
     <ClInclude Include="cyCodeBase\cyString.h" />
     <ClInclude Include="cyCodeBase\cyTimer.h" />
     <ClInclude Include="cyCodeBase\cyTriMesh.h" />
+    <ClInclude Include="FileLoader.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="math_3d.h" />
     <ClInclude Include="Source.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="point.frag" />
+    <None Include="point.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

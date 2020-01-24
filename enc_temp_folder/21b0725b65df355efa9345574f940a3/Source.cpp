@@ -138,6 +138,24 @@ int main()
 	// Set background color
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+	//// バーテックスシェーダのソースプログラム
+	//static constexpr GLchar vsrc[] =
+	//	"#version 330 core\n"
+	//	"in vec4 position;\n"
+	//	"void main()\n"
+	//	"{\n"
+	//	" float s = 1.0;\n"
+	//	" gl_Position = s * position;\n"
+	//	"}\n";
+	//// フラグメントシェーダのソースプログラム
+	//static constexpr GLchar fsrc[] =
+	//	"#version 330 core\n"
+	//	"out vec4 fragment;\n"
+	//	"void main()\n"
+	//	"{\n"
+	//	" fragment = vec4(1.0, 1.0, 0.0, 1.0);\n"
+	//	"}\n";
+
 	const GLuint program(FileLoader::loadShaderProgram("point.vert", "point.frag"));
 	const GLint aspectLoc(glGetUniformLocation(program, "aspect"));
 

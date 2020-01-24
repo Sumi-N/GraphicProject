@@ -74,19 +74,25 @@
     <ClInclude Include="cyCodeBase\cyTriMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="math_3d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Source.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="FileLoader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="math_3d.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="point.vert">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="point.frag">
-      <Filter>Source Files</Filter>
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
 </Project>
