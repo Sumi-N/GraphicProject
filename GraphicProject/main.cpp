@@ -7,10 +7,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "Constatnt.h"
 #include "Utility.h"
 #include "FileLoader.h"
-#include "Input.h"
 #include "Camera.h"
+#include "Input.h"
 
 GLFWwindow * window;
 cy::TriMesh data;
@@ -37,7 +38,7 @@ int main()
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Creating a window
-	window = glfwCreateWindow(800, 800, "Interactive Graphics", NULL, NULL);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Interactive Graphics", NULL, NULL);
 	if (window == NULL)
 	{
 		// If the window is not created
@@ -95,6 +96,7 @@ int main()
 	};
 
 	glfwSetKeyCallback(window, Input::keyCallback);
+	glfwSetMouseButtonCallback(window, Input::mouseButtonCallback);
 	glfwSetCursorPosCallback(window, Input::cursorPositionCallback);
 
 	while (glfwWindowShouldClose(window) == GL_FALSE)
@@ -111,6 +113,7 @@ int main()
 
 		glfwSwapBuffers(window);
 		// call callback
+		//glfwPollEvents();
 		glfwWaitEvents();
 	}
 }
