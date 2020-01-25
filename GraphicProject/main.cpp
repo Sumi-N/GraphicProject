@@ -95,6 +95,7 @@ int main()
 	};
 
 	glfwSetKeyCallback(window, Input::keyCallback);
+	glfwSetCursorPosCallback(window, Input::cursorPositionCallback);
 
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
