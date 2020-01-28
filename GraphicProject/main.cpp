@@ -15,7 +15,6 @@
 
 GLFWwindow * window;
 cy::TriMesh data;
-GLuint program;
 Camera camera;
 
 int main()
@@ -81,19 +80,16 @@ int main()
 	// Set background color
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	program = FileLoader::loadShaderProgram("point.vert", "point.frag");
+	GLuint program = FileLoader::loadShaderProgram(VERTEXSHADERPATH, FRAGMENTSHADERPATH);
+
 	GLint mvplocation = glGetUniformLocation(program, "mvp");
 	if (mvplocation == -1)
 	{
 		std::cerr << "The uniform variable doesn't exist in the shader file" << std::endl;
 	}
-	GLfloat matrix[16] = 
-	{
-		0.05f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.05f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.05f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f,
-	};
+
+	// Use graphic pipeline
+	glUseProgram(program);
 
 	glfwSetKeyCallback(window, Input::keyCallback);
 	glfwSetMouseButtonCallback(window, Input::mouseButtonCallback);
@@ -103,17 +99,14 @@ int main()
 	{
 		// clear window
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		// Use graphic pipeline
-		glUseProgram(program);
 		
 		// Draw call
 		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &camera.mvp[0][0]);
 		glDrawElements(GL_TRIANGLES, data.NF() * sizeof(data.F(0)), GL_UNSIGNED_INT, (void*)0);
 
 		glfwSwapBuffers(window);
+
 		// call callback
-		//glfwPollEvents();
 		glfwWaitEvents();
 	}
 }

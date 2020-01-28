@@ -3,5 +3,5 @@ out vec4 fragment;
 in vec4 vertexcolor;
 void main()
 {
-	fragment = vec4(0.0, 1.0, 1.0, 1.0);
+	fragment = vec4(1.0, 0.0, 1.0, 1.0);
 }

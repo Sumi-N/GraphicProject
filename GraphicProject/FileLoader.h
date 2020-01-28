@@ -88,4 +88,11 @@ namespace FileLoader
 
 		return readShaderSource(vert, vertsrc) && readShaderSource(frag, fragsrc) ? createShaderProgram(vertsrc.data(), fragsrc.data()) : 0;
 	}
+
+	void recompileShader()
+	{
+		GLuint program;
+		program = loadShaderProgram(VERTEXSHADERPATH, FRAGMENTSHADERPATH);
+		glUseProgram(program);
+	}
 }

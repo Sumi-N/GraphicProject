@@ -2,6 +2,7 @@
 
 extern GLFWwindow * window;
 extern Camera camera;
+extern GLuint program;
 
 namespace Input {
 
@@ -27,14 +28,19 @@ namespace Input {
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 
+		if (key == GLFW_KEY_F6 && action == GLFW_PRESS)
+		{
+			FileLoader::recompileShader();
+		}
+
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(-0.01f, camera.upvector);
+			camera.translate(0.01f, camera.forwardvector);
 		}
 
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(0.01f, camera.upvector);
+			camera.translate(-0.01f, camera.forwardvector);
 		}
 
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
@@ -52,11 +58,11 @@ namespace Input {
 	{
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
 		{
-			if (action == GLFW_PRESS)
+			if (action == GLFW_PRESS || action == GLFW_REPEAT)
 			{
 				mousestate.isRightButtonPressing = true;
 			}
-			else if (action == GLFW_RELEASE)
+			else
 			{
 				mousestate.isRightButtonPressing = false;
 			}
@@ -64,13 +70,10 @@ namespace Input {
 
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
 		{
-			if (action == GLFW_PRESS)
+			if (action == GLFW_PRESS || action == GLFW_REPEAT)
 			{
-				if (!mousestate.isLeftButtonPressing)
-				{
-					glfwGetCursorPos(window, &mousestate.oldxpos, &mousestate.oldypos);
-				}
 				mousestate.isLeftButtonPressing = true;
+				glfwGetCursorPos(window, &mousestate.oldxpos, &mousestate.oldypos);
 			}
 			else if (action == GLFW_RELEASE)
 			{
@@ -86,8 +89,24 @@ namespace Input {
 			float rotationratex = (float)(xpos - mousestate.oldxpos) / WIDTH;
 			float rotationratey = (float)(ypos - mousestate.oldypos) / HEIGHT;
 
-			camera.rotate(-rotationratex, camera.upvector);
-			camera.rotate(-rotationratey, camera.rightvector);
+			if (rotationratex > 0)
+			{
+				camera.rotate(1, camera.upvector);
+			}
+			else if (rotationratey < 0)
+			{
+				camera.rotate(-1, camera.upvector);
+			}
+			//camera.rotate(-rotationratey, camera.rightvector);
+
+			if (rotationratey > 0)
+			{
+				camera.rotate(1, camera.rightvector);
+			}
+			else if (rotationratey < 0)
+			{
+				camera.rotate(-1, camera.rightvector);
+			}
 		}
 		else if (mousestate.isRightButtonPressing)
 		{

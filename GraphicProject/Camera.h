@@ -25,14 +25,26 @@ public:
 
 		perspective   = glm::perspective(glm::radians(45.0f), (float)WIDTH/HEIGHT, 0.1f, 100.0f);
 		orthographics = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 100.0f);
-		view          = glm::lookAt(position, forwardvector, upvector);
+		view          = glm::lookAt(position, forwardvector + position, upvector + position);
 		model         = glm::translate(glm::mat4(1.0), glm::vec3(0,0,-50));
 		mvp           = perspective * view * model;
 	}
 
 	void rotate(float amount, glm::vec3 & axis)
 	{
-		view = glm::rotate(view, 0.1f * amount, axis);
+		if (axis == upvector)
+		{
+			rightvector = (float)glm::cos(amount * glm::radians(1.0f)) * rightvector - (float)glm::sin(amount * glm::radians(1.0f)) * forwardvector;
+			forwardvector = (float)glm::sin(amount * glm::radians(1.0f)) * rightvector + (float)glm::cos(amount * glm::radians(1.0f)) * forwardvector;
+
+			//rightvector = glm::rotate(glm::mat4(), amount * glm::radians(0.01f), upvector) * glm::vec4(rightvector, 1);
+			//forwardvector = glm::rotate(glm::mat4(), amount * glm::radians(0.01f), upvector) * glm::vec4(forwardvector, 1);
+		}
+		else if (axis == rightvector)
+		{
+			//forwardvector = (float)glm::cos(amount * glm::radians(1.0f)) * forwardvector - (float)glm::sin(amount * glm::radians(1.0f)) * upvector;
+			//upvector = (float)glm::sin(amount * glm::radians(1.0f)) * forwardvector + (float)glm::cos(amount * glm::radians(1.0f)) * upvector;
+		}
 		update();
 	}
 
@@ -44,7 +56,7 @@ public:
 
 	void update()
 	{
-		view = glm::lookAt(position, forwardvector, upvector);
+		view = glm::lookAt(position, forwardvector + position, upvector + position);
 		mvp = perspective * view * model;
 	}
 };
