@@ -42,8 +42,8 @@ public:
 		}
 		else if (axis == rightvector)
 		{
-			//forwardvector = (float)glm::cos(amount * glm::radians(1.0f)) * forwardvector - (float)glm::sin(amount * glm::radians(1.0f)) * upvector;
-			//upvector = (float)glm::sin(amount * glm::radians(1.0f)) * forwardvector + (float)glm::cos(amount * glm::radians(1.0f)) * upvector;
+			forwardvector = (float)glm::cos(amount * glm::radians(1.0f)) * forwardvector - (float)glm::sin(amount * glm::radians(1.0f)) * upvector;
+			upvector = (float)glm::sin(amount * glm::radians(1.0f)) * forwardvector + (float)glm::cos(amount * glm::radians(1.0f)) * upvector;
 		}
 		update();
 	}
@@ -56,7 +56,7 @@ public:
 
 	void update()
 	{
-		view = glm::lookAt(position, forwardvector + position, upvector + position);
+		view = glm::lookAt(position, forwardvector, upvector);
 		mvp = perspective * view * model;
 	}
 };

@@ -97,6 +97,10 @@ int main()
 
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
+		// call callback
+		//glfwWaitEvents();
+		glfwPollEvents();
+
 		// clear window
 		glClear(GL_COLOR_BUFFER_BIT);
 		
@@ -105,8 +109,5 @@ int main()
 		glDrawElements(GL_TRIANGLES, data.NF() * sizeof(data.F(0)), GL_UNSIGNED_INT, (void*)0);
 
 		glfwSwapBuffers(window);
-
-		// call callback
-		glfwWaitEvents();
 	}
 }

@@ -35,27 +35,39 @@ namespace Input {
 
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(0.01f, camera.forwardvector);
+			camera.translate(0.1f, camera.forwardvector);
 		}
 
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(-0.01f, camera.forwardvector);
+			camera.translate(-0.1f, camera.forwardvector);
 		}
 
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(0.01f, camera.rightvector);
+			camera.translate(0.1f, camera.rightvector);
 		}
 
 		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(-0.01f, camera.rightvector);
+			camera.translate(-0.1f, camera.rightvector);
 		}
 	}
 
 	void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 	{
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			if (action == GLFW_PRESS || action == GLFW_REPEAT)
+			{
+				mousestate.isLeftButtonPressing = true;
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				mousestate.isLeftButtonPressing = false;
+			}
+		}
+
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
 		{
 			if (action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -67,37 +79,28 @@ namespace Input {
 				mousestate.isRightButtonPressing = false;
 			}
 		}
-
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
-		{
-			if (action == GLFW_PRESS || action == GLFW_REPEAT)
-			{
-				mousestate.isLeftButtonPressing = true;
-				glfwGetCursorPos(window, &mousestate.oldxpos, &mousestate.oldypos);
-			}
-			else if (action == GLFW_RELEASE)
-			{
-				mousestate.isLeftButtonPressing = false;
-			}
-		}
 	}
 
 	void cursorPositionCallback(GLFWwindow * window, double xpos, double ypos)
 	{
+		mousestate.oldxpos = mousestate.xpos;
+		mousestate.oldypos = mousestate.ypos;
+		mousestate.xpos = xpos;
+		mousestate.ypos = ypos;
+
 		if (mousestate.isLeftButtonPressing)
 		{
-			float rotationratex = (float)(xpos - mousestate.oldxpos) / WIDTH;
-			float rotationratey = (float)(ypos - mousestate.oldypos) / HEIGHT;
+			float rotationratex = (float)(mousestate.xpos - mousestate.oldxpos) / WIDTH;
+			float rotationratey = (float)(mousestate.ypos - mousestate.oldypos) / HEIGHT;
 
 			if (rotationratex > 0)
 			{
 				camera.rotate(1, camera.upvector);
-			}
-			else if (rotationratey < 0)
+			}			
+			else if (rotationratex < 0)
 			{
 				camera.rotate(-1, camera.upvector);
 			}
-			//camera.rotate(-rotationratey, camera.rightvector);
 
 			if (rotationratey > 0)
 			{
@@ -108,7 +111,7 @@ namespace Input {
 				camera.rotate(-1, camera.rightvector);
 			}
 		}
-		else if (mousestate.isRightButtonPressing)
+		//else if (mousestate.isRightButtonPressing)
 		{
 
 		}
