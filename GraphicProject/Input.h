@@ -111,10 +111,6 @@ namespace Input {
 				camera.rotate(-1, camera.rightvector);
 			}
 		}
-		//else if (mousestate.isRightButtonPressing)
-		{
-
-		}
 
 		return;
 	}

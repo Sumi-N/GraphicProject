@@ -1,12 +1,13 @@
 #pragma once
 
+#include "Object.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 class Camera
 {
 public:
 	glm::mat4 mvp;
-	glm::mat4 model;
 	glm::mat4 view;
 	glm::mat4 perspective;
 	glm::mat4 orthographics;
@@ -26,10 +27,8 @@ public:
 		lookatvector  = forwardvector - position;
 
 		perspective   = glm::perspective(glm::radians(45.0f), (float)WIDTH/HEIGHT, 0.1f, 100.0f);
-		orthographics = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 1000.0f);
+		orthographics = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 100.0f);
 		view          = glm::lookAt(position, lookatvector, upvector);
-		model         = glm::translate(glm::mat4(1.0), glm::vec3(0,0,-50));
-		mvp           = perspective * view * model;
 	}
 
 	void rotate(float amount, glm::vec3 & axis)
@@ -58,6 +57,11 @@ public:
 	{
 		lookatvector = forwardvector + position;
 		view = glm::lookAt(position, lookatvector, upvector);
-		mvp = perspective * view * model;
+	}
+
+	void updatemvp(Object & obj)
+	{
+		obj.update();
+		mvp = perspective * view * obj.modelcoordinate;
 	}
 };
