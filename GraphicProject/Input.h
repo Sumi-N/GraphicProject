@@ -35,22 +35,22 @@ namespace Input {
 
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(0.1f, camera.forwardvector);
+			camera.translate(0.5f, camera.forwardvector);
 		}
 
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(-0.1f, camera.forwardvector);
+			camera.translate(-0.5f, camera.forwardvector);
 		}
 
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(0.1f, camera.rightvector);
+			camera.translate(-0.5f, camera.rightvector);
 		}
 
 		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(-0.1f, camera.rightvector);
+			camera.translate(0.5f, camera.rightvector);
 		}
 	}
 

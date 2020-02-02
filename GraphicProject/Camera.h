@@ -15,17 +15,19 @@ public:
 	glm::vec3 forwardvector;
 	glm::vec3 upvector;
 	glm::vec3 rightvector;
+	glm::vec3 lookatvector;
 
 	Camera()
 	{
 		position      = glm::vec3(0, 0, 0);
 		forwardvector = glm::vec3(0, 0, -1);
 		upvector      = glm::vec3(0, 1, 0);
-		rightvector   = glm::cross(forwardvector, upvector);
+		rightvector   = glm::normalize(glm::cross(forwardvector, upvector));
+		lookatvector  = forwardvector - position;
 
 		perspective   = glm::perspective(glm::radians(45.0f), (float)WIDTH/HEIGHT, 0.1f, 100.0f);
-		orthographics = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 100.0f);
-		view          = glm::lookAt(position, forwardvector + position, upvector + position);
+		orthographics = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 1000.0f);
+		view          = glm::lookAt(position, lookatvector, upvector);
 		model         = glm::translate(glm::mat4(1.0), glm::vec3(0,0,-50));
 		mvp           = perspective * view * model;
 	}
@@ -34,16 +36,14 @@ public:
 	{
 		if (axis == upvector)
 		{
-			rightvector = (float)glm::cos(amount * glm::radians(1.0f)) * rightvector - (float)glm::sin(amount * glm::radians(1.0f)) * forwardvector;
+			rightvector   = (float)glm::cos(amount * glm::radians(1.0f)) * rightvector - (float)glm::sin(amount * glm::radians(1.0f)) * forwardvector;
 			forwardvector = (float)glm::sin(amount * glm::radians(1.0f)) * rightvector + (float)glm::cos(amount * glm::radians(1.0f)) * forwardvector;
 
-			//rightvector = glm::rotate(glm::mat4(), amount * glm::radians(0.01f), upvector) * glm::vec4(rightvector, 1);
-			//forwardvector = glm::rotate(glm::mat4(), amount * glm::radians(0.01f), upvector) * glm::vec4(forwardvector, 1);
 		}
 		else if (axis == rightvector)
 		{
 			forwardvector = (float)glm::cos(amount * glm::radians(1.0f)) * forwardvector - (float)glm::sin(amount * glm::radians(1.0f)) * upvector;
-			upvector = (float)glm::sin(amount * glm::radians(1.0f)) * forwardvector + (float)glm::cos(amount * glm::radians(1.0f)) * upvector;
+			upvector      = (float)glm::sin(amount * glm::radians(1.0f)) * forwardvector + (float)glm::cos(amount * glm::radians(1.0f)) * upvector;
 		}
 		update();
 	}
@@ -56,7 +56,8 @@ public:
 
 	void update()
 	{
-		view = glm::lookAt(position, forwardvector, upvector);
+		lookatvector = forwardvector + position;
+		view = glm::lookAt(position, lookatvector, upvector);
 		mvp = perspective * view * model;
 	}
 };
