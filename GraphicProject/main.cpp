@@ -13,10 +13,13 @@
 #include "Camera.h"
 #include "Input.h"
 #include "Object.h"
+#include "Light.h"
 
 GLFWwindow * window;
 Camera camera;
 Object teapot;
+AmbientLight ambientlight;
+PointLight pointlight;
 
 int main()
 {
@@ -56,11 +59,17 @@ int main()
 		return 1;
 	}
 
-	// Create vertex buffer object
-	//data.LoadFromFileObj("../Objfiles/teapot.obj", true);
+	// Load teapot data
 	teapot.data.LoadFromFileObj("../Objfiles/teapot.obj", true);
 	teapot.position = glm::vec3(0, 0, -50);
 	//teapot.scale = glm::vec3(1.0, 1.0, 2.0);
+	teapot.diffuse = glm::vec3(0.8, 0.2, 0.2);
+	teapot.specular = glm::vec4(1.0, 1.0, 1.0, 20);
+
+	// Setup Light
+	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
+	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
+	pointlight.position = glm::vec3(20, 0, 0);
 
 	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
@@ -109,12 +118,45 @@ int main()
 		std::cerr << "The mtransposelocation variable doesn't exist in the shader file" << std::endl;
 	}
 
+	GLint ambientintensity = glGetUniformLocation(program, "ambientintensity");
+	if (ambientintensity == -1)
+	{
+		std::cerr << "The ambientintensity variable doesn't exist in the shader file" << std::endl;
+	}
+
+	GLint diffuselocation = glGetUniformLocation(program, "diffuse");
+	if (diffuselocation == -1)
+	{
+		std::cerr << "The diffuselocation variable doesn't exist in the shader file" << std::endl;
+	}
+
+	GLint specularlocation = glGetUniformLocation(program, "specular");
+	if (specularlocation == -1)
+	{
+		std::cerr << "The specularlocation variable doesn't exist in the shader file" << std::endl;
+	}
+
+	GLint pointintensitylocation = glGetUniformLocation(program, "pointintensity");
+	if (pointintensitylocation == -1)
+	{
+		std::cerr << "The pointintensitylocation variable doesn't exist in the shader file" << std::endl;
+	}
+
+	GLint pointpositionlocation = glGetUniformLocation(program, "pointposition");
+	if (pointpositionlocation == -1)
+	{
+		std::cerr << "The pointpositionlocation variable doesn't exist in the shader file" << std::endl;
+	}
+
 	// Use graphic pipeline
 	glUseProgram(program);
 
 	glfwSetKeyCallback(window, Input::keyCallback);
 	glfwSetMouseButtonCallback(window, Input::mouseButtonCallback);
 	glfwSetCursorPosCallback(window, Input::cursorPositionCallback);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
@@ -125,9 +167,16 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		// Draw call
+
 		camera.updatemvp(teapot);
+
 		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &camera.mvp[0][0]);
-		glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &teapot.modeltranspose[0][0]);
+		glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &teapot.modelinversetranspose[0][0]);
+		glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
+		glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
+		glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
+		glUniform3f(diffuselocation, teapot.diffuse.r, teapot.diffuse.g, teapot.diffuse.b);
+		glUniform4f(specularlocation, teapot.specular.r, teapot.specular.g, teapot.specular.b, teapot.specular.w);
 		glDrawElements(GL_TRIANGLES, teapot.data.NF() * sizeof(teapot.data.F(0)), GL_UNSIGNED_INT, (void*)0);
 
 		glfwSwapBuffers(window);

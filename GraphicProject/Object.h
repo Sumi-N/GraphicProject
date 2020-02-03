@@ -13,7 +13,10 @@ public:
 	//glm::vec3 rotation;
 
 	glm::mat4 modelcoordinate = glm::mat4(1.0);
-	glm::mat3 modeltranspose;
+	glm::mat3 modelinversetranspose;
+
+	glm::vec3 diffuse;
+	glm::vec4 specular;
 
 	Object()
 	{
@@ -32,6 +35,6 @@ public:
 		//modelcoordinate = translatemat * rotatemat *scalemat;
 		modelcoordinate = translatemat * scalemat;
 
-		modeltranspose = glm::transpose(glm::mat3(modelcoordinate));
+		modelinversetranspose = glm::transpose(glm::inverse(glm::mat3(modelcoordinate)));
 	}
 };
