@@ -114,6 +114,12 @@ int main()
 		std::cerr << "The mvplocation variable doesn't exist in the shader file" << std::endl;
 	}
 
+	GLint modelmatrixlocation = glGetUniformLocation(program, "modelmatrix");
+	if (modelmatrixlocation == -1)
+	{
+		std::cerr << "The modelmatrix variable doesn't exist in the shader file" << std::endl;
+	}
+
 	GLint mtransposelocation = glGetUniformLocation(program, "mtranspose");
 	if (mtransposelocation == -1)
 	{
@@ -172,8 +178,11 @@ int main()
 		// Draw call
 
 		camera.updatemvp(teapot);
+		glm::mat4 modelcameramat = camera.view * teapot.modelcoordinate;
+		pointlight.position = modelcameramat * glm::vec4(pointlight.position, 1.0);
 
 		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &camera.mvp[0][0]);
+		glUniformMatrix4fv(modelmatrixlocation, 1, GL_FALSE, &modelcameramat[0][0]);
 		glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &teapot.modelinversetranspose[0][0]);
 		glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
 		glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);

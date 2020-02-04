@@ -3,6 +3,7 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 
 uniform mat4 mvp;
+uniform mat4 modelcameramatrix;
 uniform mat3 mtranspose;
 uniform vec3 ambientintensity;
 uniform vec3 pointintensity;
@@ -20,10 +21,10 @@ out vec4 specularout;
 void main()
 {
 	gl_Position = mvp * vec4(position, 1);
-	normalvetor = abs(normalize(mtranspose * normal));
-	//normalvetor = normalize(mtranspose * normal);
+	//normalvetor = abs(normalize(mtranspose * normal));
+	normalvetor = normalize(mtranspose * normal);
 	ambientintensityout = ambientintensity;
-	pointlightdirectioncout = normalize(vec3(gl_Position) - pointposition);
+	pointlightdirectioncout = normalize(vec3(modelcameramatrix * vec4(position,1)) - pointposition);
 	pointlightintensityout = pointintensity;
 	diffuseout = diffuse;
 	specularout = specular;
