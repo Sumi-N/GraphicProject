@@ -65,11 +65,12 @@ int main()
 	//teapot.scale = glm::vec3(1.0, 1.0, 2.0);
 	teapot.diffuse = glm::vec3(0.8, 0.2, 0.2);
 	teapot.specular = glm::vec4(1.0, 1.0, 1.0, 20);
+	teapot.organizeindiceorder();
 
 	// Setup Light
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
-	pointlight.position = glm::vec3(20, 0, 0);
+	pointlight.position = glm::vec3(20, 0, -50);
 
 	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
@@ -86,7 +87,8 @@ int main()
 	GLuint NormalBuffer;
 	glGenBuffers(1, &NormalBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalBuffer);
-	glBufferData(GL_ARRAY_BUFFER, teapot.data.NVN() * sizeof(teapot.data.VN(0)), &teapot.data.VN(0), GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, teapot.data.NVN() * sizeof(teapot.data.VN(0)), &teapot.data.VN(0), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, teapot.data.NVN() * sizeof(teapot.sortedvn[0]), &teapot.sortedvn[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalBuffer);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -155,6 +157,7 @@ int main()
 	glfwSetMouseButtonCallback(window, Input::mouseButtonCallback);
 	glfwSetCursorPosCallback(window, Input::cursorPositionCallback);
 
+	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
@@ -164,7 +167,7 @@ int main()
 		glfwPollEvents();
 
 		// clear window
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		// Draw call
 

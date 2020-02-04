@@ -20,7 +20,8 @@ out vec4 specularout;
 void main()
 {
 	gl_Position = mvp * vec4(position, 1);
-	normalvetor = normalize(mtranspose * normal);
+	normalvetor = abs(normalize(mtranspose * normal));
+	//normalvetor = normalize(mtranspose * normal);
 	ambientintensityout = ambientintensity;
 	pointlightdirectioncout = normalize(vec3(gl_Position) - pointposition);
 	pointlightintensityout = pointintensity;
