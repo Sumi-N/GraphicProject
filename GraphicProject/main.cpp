@@ -70,7 +70,7 @@ int main()
 	// Setup Light
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
-	pointlight.position = glm::vec3(20, 0, -50);
+	pointlight.position = glm::vec3(0, 0, -50);
 
 	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
@@ -177,11 +177,12 @@ int main()
 		
 		// Draw call
 
-		camera.updatemvp(teapot);
-		glm::mat4 modelcameramat = camera.view * teapot.modelcoordinate;
-		pointlight.position = modelcameramat * glm::vec4(pointlight.position, 1.0);
+		teapot.update();
+		glm::mat4 modelcameramat = teapot.modelcoordinate;
+		pointlight.position = glm::vec4(pointlight.position, 1.0);
+		glm::mat4 mvp = camera.perspective * camera.view * teapot.modelcoordinate;
 
-		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &camera.mvp[0][0]);
+		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &mvp[0][0]);
 		glUniformMatrix4fv(modelmatrixlocation, 1, GL_FALSE, &modelcameramat[0][0]);
 		glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &teapot.modelinversetranspose[0][0]);
 		glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);

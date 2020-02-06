@@ -35,39 +35,27 @@ namespace Input {
 
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(0.5f, camera.forwardvector);
+			camera.Translate(0.5f, camera.forwardvec);
 		}
 
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(-0.5f, camera.forwardvector);
+			camera.Translate(-0.5f, camera.forwardvec);
 		}
 
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(-0.5f, camera.rightvector);
+			camera.Translate(-0.5f, camera.rightvec);
 		}
 
 		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.translate(0.5f, camera.rightvector);
+			camera.Translate(0.5f, camera.rightvec);
 		}
 	}
 
 	void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 	{
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
-		{
-			if (action == GLFW_PRESS || action == GLFW_REPEAT)
-			{
-				mousestate.isLeftButtonPressing = true;
-			}
-			else if (action == GLFW_RELEASE)
-			{
-				mousestate.isLeftButtonPressing = false;
-			}
-		}
-
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
 		{
 			if (action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -79,6 +67,18 @@ namespace Input {
 				mousestate.isRightButtonPressing = false;
 			}
 		}
+
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			if (action == GLFW_PRESS || action == GLFW_REPEAT)
+			{
+				mousestate.isLeftButtonPressing = true;
+			}
+			else if (action == GLFW_RELEASE)
+			{
+				mousestate.isLeftButtonPressing = false;
+			}
+		}
 	}
 
 	void cursorPositionCallback(GLFWwindow * window, double xpos, double ypos)
@@ -88,27 +88,30 @@ namespace Input {
 		mousestate.xpos = xpos;
 		mousestate.ypos = ypos;
 
-		if (mousestate.isLeftButtonPressing)
+		glm::vec3 up = glm::vec3(0, 1, 0);
+		glm::vec3 right = camera.rightvec;
+
+		if (mousestate.isRightButtonPressing)
 		{
-			float rotationratex = (float)(mousestate.xpos - mousestate.oldxpos) / WIDTH;
-			float rotationratey = (float)(mousestate.ypos - mousestate.oldypos) / HEIGHT;
+			float rotationratex = (float)(mousestate.xpos - mousestate.oldxpos);
+			float rotationratey = (float)(mousestate.ypos - mousestate.oldypos);
 
 			if (rotationratex > 0)
 			{
-				camera.rotate(1, camera.upvector);
+				camera.RotateAround(1, up);
 			}			
 			else if (rotationratex < 0)
 			{
-				camera.rotate(-1, camera.upvector);
+				camera.RotateAround(-1, up);
 			}
 
 			if (rotationratey > 0)
 			{
-				camera.rotate(1, camera.rightvector);
+				camera.RotateAround(1, right);
 			}
 			else if (rotationratey < 0)
 			{
-				camera.rotate(-1, camera.rightvector);
+				camera.RotateAround(-1, right);
 			}
 		}
 

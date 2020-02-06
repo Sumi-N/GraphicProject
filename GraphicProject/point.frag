@@ -20,7 +20,7 @@ void main()
 	if(costheta > 0){
 		fragment += costheta * vec4(diffuseout, 1.0) *  vec4(pointlightintensityout, 1.0);
 
-			vec3 h = (vec3(0, 0, 1) + pointlightdirectioncout) / length(vec3(0, 0, 1) + pointlightdirectioncout);
+		vec3 h = (vec3(0, 0, 1) + pointlightdirectioncout) / length(vec3(0, 0, 1) + pointlightdirectioncout);
 		fragment += vec4(vec3(specularout) * pow(dot(h, normalvetor), specularout.w), 1.0);
 	}
 }
