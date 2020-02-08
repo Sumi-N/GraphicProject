@@ -25,7 +25,7 @@ namespace Application {
 		while (true)
 		{
 			timer.Run();
-			printf("%f", timer.time.dt);
+			//printf("%f", timer.time.dt);
 		}
 	}
 
