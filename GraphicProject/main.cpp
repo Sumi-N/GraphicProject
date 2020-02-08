@@ -15,8 +15,12 @@
 #include "Object.h"
 #include "Light.h"
 
+// About threading
 #include <thread>
+#include <mutex>
 #include "GameThread.h"
+
+std::mutex m;
 
 GLFWwindow * window;
 Camera camera;
@@ -24,13 +28,10 @@ Object teapot;
 AmbientLight ambientlight;
 PointLight pointlight;
 
-std::thread* pointer;
-
 int main()
 {
 	// Start the game thread
 	std::thread gamethread(Application::Init);
-	pointer = &gamethread;
 
 	// Initialize GLFW
 	if (glfwInit() == GL_FALSE)

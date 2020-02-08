@@ -3,15 +3,23 @@
 #include <cyCodeBase/cyTriMesh.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+// Forward declaration
+class Mesh;
+
 class Object
 {
 public:
 	cy::TriMesh data;
 	cy::Point3f * sortedvn;
 
-	glm::vec3 position;
-	glm::vec3 scale = glm::vec3(1.0, 1.0, 1.0);
-	//glm::vec3 rotation;
+	Mesh * mesh;
+
+	glm::vec3 pos;
+	glm::vec3 scale;
+	glm::vec3 rot;
+
+	glm::vec3 vel;
+	glm::vec3 acc;
 
 	glm::mat4 modelcoordinate = glm::mat4(1.0);
 	glm::mat3 modelinversetranspose;
@@ -21,18 +29,33 @@ public:
 
 	Object()
 	{
+		pos      = glm::vec3(0.0, 0.0, 0.0);
+		scale    = glm::vec3(1.0, 1.0, 1.0);
+		rot      = glm::vec3(0.0, 0.0, 0.0);
+
+		pos      = glm::vec3(0.0, 0.0, 0.0);
+		acc      = glm::vec3(0.0, 0.0, 0.0);
+
 		//glm::mat4 rotatemat = glm::rotate();
 		glm::mat4 scalemat = glm::scale(glm::mat4(1.0), scale);
-		glm::mat4 translatemat = glm::translate(glm::mat4(1.0), position);
+		glm::mat4 translatemat = glm::translate(glm::mat4(1.0), pos);
 		//modelcoordinate = translatemat * rotatemat *scalemat;
 		modelcoordinate = translatemat * scalemat;
 	}
+
+	void Translate(glm::vec3 & pos)
+	{
+		this->pos = pos;
+	}
+
+	//virtual void Update(float dt);
+
 
 	void update()
 	{
 		//glm::mat4 rotatemat = glm::rotate();
 		glm::mat4 scalemat = glm::scale(glm::mat4(1.0), scale);
-		glm::mat4 translatemat = glm::translate(glm::mat4(1.0), position);
+		glm::mat4 translatemat = glm::translate(glm::mat4(1.0), pos);
 		//modelcoordinate = translatemat * rotatemat *scalemat;
 		modelcoordinate = translatemat * scalemat;
 

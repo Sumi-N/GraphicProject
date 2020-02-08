@@ -1,18 +1,21 @@
 #pragma once
 
 #include "Object.h"
+#include "Constatnt.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
-class Camera
+#include <mutex>
+extern std::mutex m;
+
+class Camera : public Object
 {
 public:
 	glm::mat4 view;
 	glm::mat4 perspective;
 	glm::mat4 orthographics;
 
-	glm::vec3 pos;
 	glm::vec3 forwardvec;
 	glm::vec3 upvec;
 	glm::vec3 rightvec;
@@ -34,7 +37,7 @@ public:
 		nearestclip = 0.1f;
 		farestclip  = 100.0f;
 
-		// The parameters for lookAt function are position position, target, upvector
+		// The parameters for lookAt function are position, target, upvector
 		// target is equal to forwardvector + position;
 		view          = glm::lookAt(pos, pos + forwardvec, upvec);
 		perspective   = glm::perspective(glm::radians(fov), (float)WIDTH / HEIGHT, nearestclip, farestclip);
@@ -46,21 +49,20 @@ public:
 		forwardvec = glm::rotate(forwardvec, -1 * glm::radians(amount), axis);
 		upvec      = glm::rotate(upvec, -1 * glm::radians(amount), axis);
 		rightvec   = glm::cross(forwardvec, upvec);
-
-		// Temporary function
-		Update();
 	}
 
-	void Translate(float amount, glm::vec3 & axis)
+	void MoveCamera(glm::vec3 & dir)
 	{
-		pos += amount * axis;
-
-		// Temporary function
-		Update();
+		vel = -1.0f * dir;
 	}
 
-	void Update()
+	void Update(float dt)
 	{
+		//m.lock();
+
+		pos += dt * vel;
 		view = glm::lookAt(pos, pos + forwardvec, upvec);
+
+		//m.unlock();
 	}
 };

@@ -23,6 +23,9 @@ namespace Input {
 
 	void keyCallback(GLFWwindow * window, int key, int scancode, int action, int mods) 
 	{
+		glm::vec3 zero = glm::vec3(0, 0, 0);
+		camera.MoveCamera(zero);
+
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
 			glfwSetWindowShouldClose(window, GL_TRUE);
@@ -35,22 +38,26 @@ namespace Input {
 
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.Translate(0.5f, camera.forwardvec);
+			glm::vec3 forward = 0.01f * camera.forwardvec;
+			camera.MoveCamera(forward);
 		}
 
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.Translate(-0.5f, camera.forwardvec);
+			glm::vec3 back = -0.01f * camera.forwardvec;
+			camera.MoveCamera(back);
 		}
 
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.Translate(-0.5f, camera.rightvec);
+			glm::vec3 right = 0.01f * camera.rightvec;
+			camera.MoveCamera(right);
 		}
 
 		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.Translate(0.5f, camera.rightvec);
+			glm::vec3 left = -0.01f * camera.rightvec;
+			camera.MoveCamera(left);
 		}
 	}
 
