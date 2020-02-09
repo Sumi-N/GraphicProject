@@ -7,7 +7,9 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 #include <mutex>
-extern std::mutex m;
+extern std::mutex mtx;
+
+#include <stdio.h>
 
 class Camera : public Object
 {
@@ -45,23 +47,24 @@ public:
 
 	void RotateAround(float amount, glm::vec3 & axis)
 	{
+		//mtx.lock();
 		forwardvec = glm::rotate(forwardvec, -1 * glm::radians(amount), axis);
 		upvec      = glm::rotate(upvec, -1 * glm::radians(amount), axis);
 		rightvec   = glm::cross(forwardvec, upvec);
+		//mtx.unlock();
 	}
 
-	void MoveCamera(glm::vec3 & dir)
+	void MoveCamera(float amount, glm::vec3 & dir)
 	{
-		vel = -1.0f * dir;
+		vel = amount * dir;
 	}
 
 	void Update(float dt)
 	{
-		//m.lock();
+		//printf("The value of x:%f y:%f z:%f is \n" ,pos.x, pos.y, pos.z);
 
 		pos += dt * vel;
 		view = glm::lookAt(pos, pos + forwardvec, upvec);
 
-		//m.unlock();
 	}
 };

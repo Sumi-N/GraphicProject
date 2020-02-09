@@ -1,4 +1,5 @@
 #include "GameThread.h"
+#include <mutex>
 #include <stdio.h>
 
 #include "Object.h"
@@ -6,6 +7,8 @@
 
 extern Object teapot;
 extern Camera camera;
+extern Timer  timer;
+extern std::mutex mtx;
 
 namespace Application {
 
@@ -46,6 +49,7 @@ namespace Application {
 		teapot.organizeindiceorder();
 
 		GameThread gamethread;
+
 		gamethread.Init();
 		gamethread.Run();
 	

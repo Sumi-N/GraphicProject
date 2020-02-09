@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <cstdlib>
 #include <iostream>
@@ -20,7 +20,7 @@
 #include <mutex>
 #include "GameThread.h"
 
-std::mutex m;
+std::mutex mtx;
 
 GLFWwindow * window;
 Camera camera;
@@ -130,12 +130,6 @@ int main()
 		std::cerr << "The modelmatrix variable doesn't exist in the shader file" << std::endl;
 	}
 
-	GLint cameramatrixlocation = glGetUniformLocation(program, "cameramatrix");
-	if (cameramatrixlocation == -1)
-	{
-		std::cerr << "The cameramatrix variable doesn't exist in the shader file" << std::endl;
-	}
-
 	GLint mtransposelocation = glGetUniformLocation(program, "mtranspose");
 	if (mtransposelocation == -1)
 	{
@@ -193,16 +187,15 @@ int main()
 		
 		// Draw call
 
-		//teapot.update();
-		glm::mat4 modelmatrix = teapot.modelcoordinate;
-		glm::mat4 cameramatrix = camera.view;
 		pointlight.position = glm::vec4(pointlight.position, 1.0);
+
+		glm::mat4 modelmatrix = teapot.modelcoordinate;
 		glm::mat4 mvp = camera.perspective * camera.view * teapot.modelcoordinate;
+		glm::mat3 modelinversetranspose = teapot.modelinversetranspose;
 
 		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &mvp[0][0]);
 		glUniformMatrix4fv(modelmatrixlocation, 1, GL_FALSE, &modelmatrix[0][0]);
-		glUniformMatrix4fv(cameramatrixlocation, 1, GL_FALSE, &cameramatrix[0][0]);
-		glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &teapot.modelinversetranspose[0][0]);
+		glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &modelinversetranspose[0][0]);
 		glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
 		glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
 		glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
