@@ -21,6 +21,11 @@ public:
 	glm::vec3 vel;
 	glm::vec3 acc;
 
+	glm::vec3 angvel;
+	glm::vec3 angacc;
+
+
+
 	glm::mat4 modelcoordinate = glm::mat4(1.0);
 	glm::mat3 modelinversetranspose;
 
@@ -33,8 +38,10 @@ public:
 		scale    = glm::vec3(1.0, 1.0, 1.0);
 		rot      = glm::vec3(0.0, 0.0, 0.0);
 
-		pos      = glm::vec3(0.0, 0.0, 0.0);
+		vel      = glm::vec3(0.0, 0.0, 0.0);
 		acc      = glm::vec3(0.0, 0.0, 0.0);
+		angvel   = glm::vec3(0.0, 0.0, 0.0);
+		angacc   = glm::vec3(0.0, 0.0, 0.0);
 
 		//glm::mat4 rotatemat = glm::rotate();
 		glm::mat4 scalemat = glm::scale(glm::mat4(1.0), scale);

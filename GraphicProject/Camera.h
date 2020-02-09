@@ -28,7 +28,6 @@ public:
 
 	Camera()
 	{
-		pos        = glm::vec3(0, 0, 0);
 		forwardvec = glm::vec3(0, 0, -1);
 		upvec      = glm::vec3(0, 1, 0);
 		rightvec   = glm::normalize(glm::cross(forwardvec, upvec));
@@ -37,7 +36,7 @@ public:
 		nearestclip = 0.1f;
 		farestclip  = 100.0f;
 
-		// The parameters for lookAt function are position, target, upvector
+		// The parameters for lookAt function are position, target, up vector
 		// target is equal to forwardvector + position;
 		view          = glm::lookAt(pos, pos + forwardvec, upvec);
 		perspective   = glm::perspective(glm::radians(fov), (float)WIDTH / HEIGHT, nearestclip, farestclip);

@@ -28,6 +28,7 @@ namespace Application {
 		while (true)
 		{
 			timer.Run();
+			teapot.update();
 			camera.Update(timer.time.dt);
 		}
 	}

@@ -193,7 +193,7 @@ int main()
 		
 		// Draw call
 
-		teapot.update();
+		//teapot.update();
 		glm::mat4 modelmatrix = teapot.modelcoordinate;
 		glm::mat4 cameramatrix = camera.view;
 		pointlight.position = glm::vec4(pointlight.position, 1.0);
