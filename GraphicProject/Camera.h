@@ -47,11 +47,9 @@ public:
 
 	void RotateAround(float amount, glm::vec3 & axis)
 	{
-		//mtx.lock();
 		forwardvec = glm::rotate(forwardvec, -1 * glm::radians(amount), axis);
 		upvec      = glm::rotate(upvec, -1 * glm::radians(amount), axis);
 		rightvec   = glm::cross(forwardvec, upvec);
-		//mtx.unlock();
 	}
 
 	void MoveCamera(float amount, glm::vec3 & dir)
@@ -62,9 +60,7 @@ public:
 	void Update(float dt)
 	{
 		//printf("The value of x:%f y:%f z:%f is \n" ,pos.x, pos.y, pos.z);
-
-		pos += dt * vel;
+		pos += (float)dt * vel;
 		view = glm::lookAt(pos, pos + forwardvec, upvec);
-
 	}
 };

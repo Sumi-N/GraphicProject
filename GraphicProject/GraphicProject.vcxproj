@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameThread.cpp" />
+    <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -29,6 +30,7 @@
     <ClInclude Include="GameThread.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="lodepng.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Timer.h" />

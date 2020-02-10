@@ -69,18 +69,10 @@ int main()
 		return 1;
 	}
 
-	//// Load teapot data
-	//teapot.data.LoadFromFileObj("../Objfiles/teapot.obj", true);
-	//teapot.position = glm::vec3(0, 0, -50);
-	////teapot.scale = glm::vec3(1.0, 1.0, 2.0);
-	//teapot.diffuse = glm::vec3(0.8, 0.2, 0.2);
-	//teapot.specular = glm::vec4(1.0, 1.0, 1.0, 20);
-	//teapot.organizeindiceorder();
-
 	// Setup Light
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
-	pointlight.position = glm::vec3(20, 0, -50);
+	pointlight.position = glm::vec3(20, 20, -50);
 
 	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
@@ -128,6 +120,12 @@ int main()
 	if (modelmatrixlocation == -1)
 	{
 		std::cerr << "The modelmatrix variable doesn't exist in the shader file" << std::endl;
+	}
+
+	GLint cameraposition = glGetUniformLocation(program, "cameraposition");
+	if (cameraposition == -1)
+	{
+		std::cerr << "The cameraposition variable doesn't exist in the shader file" << std::endl;
 	}
 
 	GLint mtransposelocation = glGetUniformLocation(program, "mtranspose");
@@ -196,6 +194,7 @@ int main()
 		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &mvp[0][0]);
 		glUniformMatrix4fv(modelmatrixlocation, 1, GL_FALSE, &modelmatrix[0][0]);
 		glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &modelinversetranspose[0][0]);
+		glUniform3f(cameraposition, camera.pos.x, camera.pos.y, camera.pos.y);
 		glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
 		glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
 		glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);

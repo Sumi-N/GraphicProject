@@ -6,6 +6,7 @@ in vec3 normalvetor;
 in vec3 ambientintensityout;
 in vec3 pointlightdirectioncout;
 in vec3 pointlightintensityout;
+in vec3 seeangle;
 in vec3 diffuseout;
 in vec4 specularout;
 
@@ -21,8 +22,10 @@ void main()
 	{
 		fragment += costheta * vec4(diffuseout, 1.0) *  vec4(pointlightintensityout, 1.0);
 
-		vec3 h = (vec3(0, 0, 1) + pointlightdirectioncout) / length(vec3(0, 0, 1) + pointlightdirectioncout);
+		vec3 h = normalize(seeangle + pointlightdirectioncout);
 		if(dot(h, normalvetor) > 0)
+		{
 			fragment += vec4(vec3(specularout) * pow(dot(h, normalvetor), specularout.w), 1.0);
+		}
 	}
 }

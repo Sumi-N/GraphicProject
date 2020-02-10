@@ -82,5 +82,8 @@ public:
 			sortedvn[data.F(i).v[1]] = data.VN(data.FN(i).v[1]);
 			sortedvn[data.F(i).v[2]] = data.VN(data.FN(i).v[2]);
 		}
+
+		diffuse = glm::vec3(data.M(0).Kd[0], data.M(0).Kd[1], data.M(0).Kd[2]);
+		specular = glm::vec4(data.M(0).Ks[0], data.M(0).Ks[1], data.M(0).Ks[2], data.M(0).Ns);
 	}
 };

@@ -44,8 +44,7 @@ namespace Application {
 		teapot.data.LoadFromFileObj("../Objfiles/teapot.obj", true);
 		teapot.pos = glm::vec3(0, 0, -50);
 		//teapot.scale = glm::vec3(1.0, 1.0, 2.0);
-		teapot.diffuse = glm::vec3(0.8, 0.2, 0.2);
-		teapot.specular = glm::vec4(1.0, 1.0, 1.0, 20);
+
 		teapot.organizeindiceorder();
 
 		GameThread gamethread;
