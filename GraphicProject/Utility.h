@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace Utiliti
+namespace Utility
 {
 
 	GLboolean printShaderInfoLog(GLuint shader, const char *str)

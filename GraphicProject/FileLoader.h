@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include "Texture.h"
 
 namespace FileLoader
 {
@@ -48,7 +49,7 @@ namespace FileLoader
 			glShaderSource(vobj, 1, &vertscr, NULL);
 			glCompileShader(vobj);
 
-			if (Utiliti::printShaderInfoLog(vobj, "vertex shader"))
+			if (Utility::printShaderInfoLog(vobj, "vertex shader"))
 			{
 				glAttachShader(program, vobj);
 			}
@@ -61,7 +62,7 @@ namespace FileLoader
 			glShaderSource(fobj, 1, &fragsrc, NULL);
 			glCompileShader(fobj);
 
-			if (Utiliti::printShaderInfoLog(fobj, "fragment shader"))
+			if (Utility::printShaderInfoLog(fobj, "fragment shader"))
 			{
 				glAttachShader(program, fobj);
 			}
@@ -73,7 +74,7 @@ namespace FileLoader
 		glBindFragDataLocation(program, 0, "fragment");
 		glLinkProgram(program);
 
-		if (Utiliti::printProgramInfoLog(program))
+		if (Utility::printProgramInfoLog(program))
 		{
 			return program;
 		}
@@ -94,5 +95,24 @@ namespace FileLoader
 		GLuint program;
 		program = loadShaderProgram(VERTEXSHADERPATH, FRAGMENTSHADERPATH);
 		glUseProgram(program);
+	}
+
+	Texture* ReadTexture(char const *texName)
+	{
+		printf("      Texture: File \"%s\"", texName);
+
+		Texture *tex = new Texture;
+		//tex = ftex;
+		tex->SetName(texName);
+		if (!tex->Load())
+		{
+			printf(" -- Error loading file!");
+			delete tex;
+			tex = nullptr;
+		}
+
+		printf("\n");
+
+		return tex;
 	}
 }

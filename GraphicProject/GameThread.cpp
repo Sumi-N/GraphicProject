@@ -2,6 +2,7 @@
 #include <mutex>
 #include <stdio.h>
 
+//#include "FileLoader.h"
 #include "Object.h"
 #include "Camera.h"
 
@@ -44,6 +45,7 @@ namespace Application {
 		teapot.data.LoadFromFileObj("../Objfiles/teapot.obj", true);
 		teapot.pos = glm::vec3(0, 0, -50);
 		//teapot.scale = glm::vec3(1.0, 1.0, 2.0);
+		//Texture * pottexture = FileLoader::ReadTexture("../Objfiles/brick.png");
 
 		teapot.organizeindiceorder();
 
