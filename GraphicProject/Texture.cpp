@@ -104,3 +104,18 @@ bool Texture::Load()
 
 	return success;
 }
+
+void Texture::Organize()
+{
+	cleaneddata.clear();
+	cleaneddata.resize(width*height);
+
+
+	for(int i = 0 ; i < width*height; i++)
+	{
+		cleaneddata[i].r = data[i].ToColor().r;
+		cleaneddata[i].g = data[i].ToColor().g;
+		cleaneddata[i].b = data[i].ToColor().b;
+	}
+}
+

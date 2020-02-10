@@ -10,9 +10,9 @@
 #include "Constatnt.h"
 #include "Utility.h"
 #include "FileLoader.h"
-#include "Camera.h"
 #include "Input.h"
-#include "Object.h"
+#include "Camera.h"
+//#include "Object.h"
 #include "Light.h"
 
 // About threading
@@ -73,6 +73,8 @@ int main()
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
 	pointlight.position = glm::vec3(20, 20, -50);
+	Texture * pottexture = FileLoader::ReadTexture("../Objfiles/brick.png");
+	pottexture->Organize();
 
 	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
@@ -100,6 +102,17 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, teapot.data.NF() * sizeof(teapot.data.F(0)), &teapot.data.F(0), GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
+
+	GLuint TextureObj;
+	glGenTextures(1, &TextureObj);
+	glBindTexture(GL_TEXTURE_2D, TextureObj);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, pottexture->width, pottexture->height, 0, GL_RGB, GL_FLOAT, pottexture->cleaneddata.data());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, TextureObj);
+	glEnableVertexAttribArray(2);
+	glBindTexture(GL_TEXTURE_2D, TextureObj);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
 
 
 	// The timing to wait for V-Sync
@@ -164,6 +177,12 @@ int main()
 		std::cerr << "The pointpositionlocation variable doesn't exist in the shader file" << std::endl;
 	}
 
+	GLint gSampler = glGetUniformLocation(program, "gSampler");
+	if (gSampler == -1)
+	{
+		std::cerr << "The gSampler variable doesn't exist in the shader file" << std::endl;
+	}
+
 	// Use graphic pipeline
 	glUseProgram(program);
 
@@ -200,6 +219,7 @@ int main()
 		glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
 		glUniform3f(diffuselocation, teapot.diffuse.r, teapot.diffuse.g, teapot.diffuse.b);
 		glUniform4f(specularlocation, teapot.specular.r, teapot.specular.g, teapot.specular.b, teapot.specular.w);
+		glUniform1i(gSampler, 0);
 		glDrawElements(GL_TRIANGLES, teapot.data.NF() * sizeof(teapot.data.F(0)), GL_UNSIGNED_INT, (void*)0);
 
 		glfwSwapBuffers(window);

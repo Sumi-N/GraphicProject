@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FileLoader.cpp" />
     <ClCompile Include="GameThread.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />

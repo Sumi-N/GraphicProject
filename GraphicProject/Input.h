@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <mutex>
+#include "Camera.h"
 
 extern GLFWwindow * window;
 extern Camera camera;
