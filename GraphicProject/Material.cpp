@@ -1,4 +1,5 @@
-#include "Texture.h"
+#pragma once
+#include "Material.h"
 #include "lodepng.h"
 
 
@@ -42,7 +43,7 @@ void Texture::SetName(char const *newName)
 	}
 }
 
-bool LoadPPM(FILE *fp, int &width, int &height, std::vector<Color24> &data)
+bool LoadPPM(FILE *fp, int &width, int &height, std::vector<cy::Color24> &data)
 {
 	const int bufferSize = 1024;
 	char buffer[bufferSize];
@@ -60,7 +61,7 @@ bool LoadPPM(FILE *fp, int &width, int &height, std::vector<Color24> &data)
 	// last read line should be "255\n"
 
 	data.resize(width*height);
-	fread(data.data(), sizeof(Color24), width*height, fp);
+	fread(data.data(), sizeof(cy::Color24), width*height, fp);
 
 	return true;
 }
@@ -104,18 +105,3 @@ bool Texture::Load()
 
 	return success;
 }
-
-void Texture::Organize()
-{
-	cleaneddata.clear();
-	cleaneddata.resize(width*height);
-
-
-	for(int i = 0 ; i < width*height; i++)
-	{
-		cleaneddata[i].r = data[i].ToColor().r;
-		cleaneddata[i].g = data[i].ToColor().g;
-		cleaneddata[i].b = data[i].ToColor().b;
-	}
-}
-

@@ -2,9 +2,7 @@
 
 #include <cyCodeBase/cyTriMesh.h>
 #include <glm/gtc/matrix_transform.hpp>
-
-// Forward declaration
-class Mesh;
+#include "Mesh.h"
 
 class Object
 {
@@ -85,9 +83,9 @@ public:
 		sortedvt = new cy::Point2f[data.NF()];
 		for (int i = 0; i < data.NF(); i++)
 		{
-			sortedvt[data.F(i).v[0]] = Point2f(data.VT(data.FT(i).v[0]));
-			sortedvt[data.F(i).v[1]] = Point2f(data.VT(data.FT(i).v[1]));
-			sortedvt[data.F(i).v[2]] = Point2f(data.VT(data.FT(i).v[2]));
+			sortedvt[data.F(i).v[0]] = cy::Point2f(data.VT(data.FT(i).v[0]));
+			sortedvt[data.F(i).v[1]] = cy::Point2f(data.VT(data.FT(i).v[1]));
+			sortedvt[data.F(i).v[2]] = cy::Point2f(data.VT(data.FT(i).v[2]));
 		}
 
 

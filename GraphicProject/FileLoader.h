@@ -2,7 +2,7 @@
 #include <GL/glew.h>
 #include <iostream>
 #include <fstream>
-#include "Texture.h"
+#include "Material.h"
 
 namespace FileLoader
 {

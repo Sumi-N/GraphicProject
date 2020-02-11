@@ -102,7 +102,6 @@ namespace FileLoader
 		printf("      Texture: File \"%s\"", texName);
 
 		Texture *tex = new Texture;
-		//tex = ftex;
 		tex->SetName(texName);
 		if (!tex->Load())
 		{

@@ -12,7 +12,6 @@
 #include "FileLoader.h"
 #include "Input.h"
 #include "Camera.h"
-//#include "Object.h"
 #include "Light.h"
 
 // About threading
@@ -75,7 +74,6 @@ int main()
 	pointlight.position = glm::vec3(20, 20, -50);
 	Texture * pottexture = FileLoader::ReadTexture("../Objfiles/brick.png");
 	Texture * pottexturespecular = FileLoader::ReadTexture("../Objfiles/brick-specular.png");
-	pottexture->Organize();
 
 	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
@@ -104,14 +102,6 @@ int main()
 	glEnableVertexAttribArray(2);
 	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//GLuint UVBuffer2;
-	//glGenBuffers(1, &UVBuffer2);
-	//glBindBuffer(GL_ARRAY_BUFFER, UVBuffer2);
-	//glBufferData(GL_ARRAY_BUFFER,  teapot.data.NF() * sizeof(teapot.sortedvt[0]), &teapot.sortedvt[0], GL_STATIC_DRAW);
-	//glEnableVertexAttribArray(3);
-	//glBindBuffer(GL_ARRAY_BUFFER, UVBuffer2);
-	//glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	GLuint IndexBuffer;
 	glGenBuffers(1, &IndexBuffer);

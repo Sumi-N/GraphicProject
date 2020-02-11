@@ -4,7 +4,7 @@
 #include <mutex>
 #include <stdio.h>
 
-#include "Texture.h"
+#include "Material.h"
 #include "Object.h"
 #include "Camera.h"
 #include "FileLoader.h"

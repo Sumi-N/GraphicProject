@@ -1,3 +1,5 @@
+#pragma once
+
 // cyCodeBase by Cem Yuksel
 // [www.cemyuksel.com]
 //-------------------------------------------------------------------------------

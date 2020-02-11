@@ -1,13 +1,36 @@
 #pragma once
+
 #include <cyCodeBase/cyTriMesh.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include "Object.h"
+#include <vector>
+#include "Material.h"
+
+// Forward declaration
+class Object;
+
+struct MeshFace
+{
+	unsigned int v[3];
+};
+
+struct MeshData
+{
+	cy::Point3f vertex;
+	cy::Point3f normal;
+	cy::Point2f uv;
+};
 
 class Mesh
 {
 public:
 
-	Object * owner;
+	// Components
+	class Object * owner;
+	Texture * texture;
+
+	cy::TriMesh tmpdata;
+	std::vector<MeshFace> index;
+	std::vector<MeshData> data;
 
 	glm::mat4 translation_mat;
 	glm::mat4 scale_mat;
@@ -16,28 +39,10 @@ public:
 	glm::mat4 model_pos_mat;
 	glm::mat3 model_vec_mat;
 
-	Mesh()
-	{
-		
-	}
+	Mesh();
 
-	void Load()
-	{
-
-	}
-
-	void Init()
-	{
-
-	}
-
-	void Update()
-	{
-		translation_mat = glm::translate(glm::mat4(1.0), owner->pos);
-		scale_mat       = glm::scale(glm::mat4(1.0), owner->scale);
-		// Just make it like this for now
-		rotation_mat    = glm::mat4(1.0);
-		model_pos_mat   = translation_mat * rotation_mat * scale_mat;
-		model_vec_mat   = glm::transpose(glm::inverse(glm::mat3(model_pos_mat)));
-	}
+	void Load(const char * filename);
+	void Init();
+	void Update();
 };
+
