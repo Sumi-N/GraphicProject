@@ -96,22 +96,4 @@ namespace FileLoader
 		program = loadShaderProgram(VERTEXSHADERPATH, FRAGMENTSHADERPATH);
 		glUseProgram(program);
 	}
-
-	Texture* ReadTexture(char const *texName)
-	{
-		printf("      Texture: File \"%s\"", texName);
-
-		Texture *tex = new Texture;
-		tex->SetName(texName);
-		if (!tex->Load())
-		{
-			printf(" -- Error loading file!");
-			delete tex;
-			tex = nullptr;
-		}
-
-		printf("\n");
-
-		return tex;
-	}
 }

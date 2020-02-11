@@ -9,11 +9,10 @@ public:
 	Texture();
 	~Texture();
 
-	char * name;
-	bool Load();
-	void SetName(char const *);
 	std::vector<cy::Color24> data;
 	int width, height;
+
+	bool Load(char const *);
 };
 
 class Material

@@ -5,7 +5,7 @@
 
 void Mesh::Load(const char * filename)
 {
-	tmpdata.LoadFromFileObj(filename);
+	tmpdata.LoadFromFileObj(filename, true);
 }
 
 void Mesh::Init()
@@ -42,14 +42,27 @@ void Mesh::Init()
 		data[tmpdata.F(i).v[2]].uv = cy::Point2f(tmpdata.VT(tmpdata.FN(i).v[2]));
 	}
 
+	// Set material info
+	material.Ns = tmpdata.M(0).Ns;
+	for (int i = 0; i < 3; i++)
+	{
+		material.Ka[i] = tmpdata.M(0).Ka[i];
+		material.Kd[i] = tmpdata.M(0).Kd[i];
+		material.Ks[i] = tmpdata.M(0).Ks[i];
+	}
 }
 
 void Mesh::Update()
 {
 	translation_mat = glm::translate(glm::mat4(1.0), owner->pos);
+
+	rotation_mat = glm::rotate(glm::mat4(1.0), glm::radians(owner->rot.x), glm::vec3(1, 0, 0));
+	rotation_mat = glm::rotate(rotation_mat, glm::radians(owner->rot.y), glm::vec3(0, 1, 0));
+	rotation_mat = glm::rotate(rotation_mat, glm::radians(owner->rot.z), glm::vec3(0, 0, 1));
+
 	scale_mat = glm::scale(glm::mat4(1.0), owner->scale);
-	// Just make it like this for now
-	rotation_mat = glm::mat4(1.0);
+
+
 	model_pos_mat = translation_mat * rotation_mat * scale_mat;
 	model_vec_mat = glm::transpose(glm::inverse(glm::mat3(model_pos_mat)));
 }

@@ -72,8 +72,11 @@ int main()
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
 	pointlight.position = glm::vec3(20, 20, -50);
-	Texture * pottexture = FileLoader::ReadTexture("../Objfiles/brick.png");
-	Texture * pottexturespecular = FileLoader::ReadTexture("../Objfiles/brick-specular.png");
+
+	Texture * pottexture = new Texture;
+	pottexture->Load("../Objfiles/brick.png");
+	Texture * pottexturespecular = new Texture;
+	pottexturespecular->Load("../Objfiles/brick-specular.png");
 
 	GLuint VAO;
 	glGenVertexArrays(1, &VAO);

@@ -5,9 +5,6 @@
 #include <vector>
 #include "Material.h"
 
-// Forward declaration
-class Object;
-
 struct MeshFace
 {
 	unsigned int v[3];
@@ -27,6 +24,7 @@ public:
 	// Components
 	class Object * owner;
 	Texture * texture;
+	Material material;
 
 	cy::TriMesh tmpdata;
 	std::vector<MeshFace> index;
