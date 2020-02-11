@@ -74,6 +74,7 @@ int main()
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
 	pointlight.position = glm::vec3(20, 20, -50);
 	Texture * pottexture = FileLoader::ReadTexture("../Objfiles/brick.png");
+	Texture * pottexturespecular = FileLoader::ReadTexture("../Objfiles/brick-specular.png");
 	pottexture->Organize();
 
 	GLuint VAO;
@@ -91,7 +92,7 @@ int main()
 	GLuint NormalBuffer;
 	glGenBuffers(1, &NormalBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalBuffer);
-	glBufferData(GL_ARRAY_BUFFER, teapot.data.NVN() * sizeof(teapot.sortedvn[0]), &teapot.sortedvn[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, teapot.data.NF() * sizeof(teapot.sortedvn[0]), &teapot.sortedvn[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalBuffer);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -99,10 +100,18 @@ int main()
 	GLuint UVBuffer;
 	glGenBuffers(1, &UVBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);
-	glBufferData(GL_ARRAY_BUFFER, teapot.data.NVT() * sizeof(teapot.sortedvt[0]), &teapot.sortedvt[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, teapot.data.NF() * sizeof(teapot.sortedvt[0]), &teapot.sortedvt[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(2);
 	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+	//GLuint UVBuffer2;
+	//glGenBuffers(1, &UVBuffer2);
+	//glBindBuffer(GL_ARRAY_BUFFER, UVBuffer2);
+	//glBufferData(GL_ARRAY_BUFFER,  teapot.data.NF() * sizeof(teapot.sortedvt[0]), &teapot.sortedvt[0], GL_STATIC_DRAW);
+	//glEnableVertexAttribArray(3);
+	//glBindBuffer(GL_ARRAY_BUFFER, UVBuffer2);
+	//glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	GLuint IndexBuffer;
 	glGenBuffers(1, &IndexBuffer);
@@ -112,11 +121,26 @@ int main()
 
 	GLuint TextureObj;
 	glGenTextures(1, &TextureObj);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, TextureObj);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pottexture->width, pottexture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, pottexture->data.data());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glActiveTexture(GL_TEXTURE0);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, TextureObj);
+
+	GLuint TextureObj2;
+	glGenTextures(1, &TextureObj2);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, TextureObj);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pottexturespecular->width, pottexturespecular->height, 0, GL_RGB, GL_UNSIGNED_BYTE, pottexturespecular->data.data());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, TextureObj);
 
 	// The timing to wait for V-Sync
@@ -187,6 +211,12 @@ int main()
 		std::cerr << "The gSampler variable doesn't exist in the shader file" << std::endl;
 	}
 
+	GLint gSampler2 = glGetUniformLocation(program, "gSampler2");
+	if (gSampler2 == -1)
+	{
+		std::cerr << "The gSampler2 variable doesn't exist in the shader file" << std::endl;
+	}
+
 	// Use graphic pipeline
 	glUseProgram(program);
 
@@ -224,6 +254,7 @@ int main()
 		glUniform3f(diffuselocation, teapot.diffuse.r, teapot.diffuse.g, teapot.diffuse.b);
 		glUniform4f(specularlocation, teapot.specular.r, teapot.specular.g, teapot.specular.b, teapot.specular.w);
 		glUniform1i(gSampler, 0);
+		glUniform1i(gSampler2, 1);
 		glDrawElements(GL_TRIANGLES, teapot.data.NF() * sizeof(teapot.data.F(0)), GL_UNSIGNED_INT, (void*)0);
 
 		glfwSwapBuffers(window);

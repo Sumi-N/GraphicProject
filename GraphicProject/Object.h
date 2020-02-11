@@ -73,11 +73,8 @@ public:
 	void organizeindiceorder()
 	{
 		// Convert normal data
-		sortedvn = new cy::Point3f[data.NVN()];
-
-		int numberofface = data.NF();
-
-		for (int i = 0; i < numberofface; i++)
+		sortedvn = new cy::Point3f[data.NF()];
+		for (int i = 0; i < data.NF(); i++)
 		{
 			sortedvn[data.F(i).v[0]] = data.VN(data.FN(i).v[0]);
 			sortedvn[data.F(i).v[1]] = data.VN(data.FN(i).v[1]);
@@ -85,16 +82,22 @@ public:
 		}
 
 		// Convert UV data
-		sortedvt = new cy::Point2f[data.NVT()];
-		for (int i = 0; i < data.NVT(); i++)
+		sortedvt = new cy::Point2f[data.NF()];
+		for (int i = 0; i < data.NF(); i++)
 		{
-			sortedvt[data.F(i).v[0]].x = Point2f(data.VT(data.FT(i).v[0])).x;
-			sortedvt[data.F(i).v[0]].y = Point2f(data.VT(data.FT(i).v[0])).y;
+			sortedvt[data.F(i).v[0]] = Point2f(data.VT(data.FT(i).v[0]));
 			sortedvt[data.F(i).v[1]] = Point2f(data.VT(data.FT(i).v[1]));
 			sortedvt[data.F(i).v[2]] = Point2f(data.VT(data.FT(i).v[2]));
+		}
+
+
+		for (int i = 0; i < data.NF(); i++)
+		{
+			printf("The index for texture face is %d, %d, %d \n", data.FT(i).v[0], data.FT(i).v[1], data.FT(i).v[2]);
 		}
 
 		diffuse = glm::vec3(data.M(0).Kd[0], data.M(0).Kd[1], data.M(0).Kd[2]);
 		specular = glm::vec4(data.M(0).Ks[0], data.M(0).Ks[1], data.M(0).Ks[2], data.M(0).Ns);
 	}
 };
+
