@@ -91,11 +91,18 @@ int main()
 	GLuint NormalBuffer;
 	glGenBuffers(1, &NormalBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalBuffer);
-	//glBufferData(GL_ARRAY_BUFFER, teapot.data.NVN() * sizeof(teapot.data.VN(0)), &teapot.data.VN(0), GL_STATIC_DRAW);
 	glBufferData(GL_ARRAY_BUFFER, teapot.data.NVN() * sizeof(teapot.sortedvn[0]), &teapot.sortedvn[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, NormalBuffer);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	GLuint UVBuffer;
+	glGenBuffers(1, &UVBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);
+	glBufferData(GL_ARRAY_BUFFER, teapot.data.NVT() * sizeof(teapot.sortedvt[0]), &teapot.sortedvt[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	GLuint IndexBuffer;
 	glGenBuffers(1, &IndexBuffer);
@@ -106,14 +113,11 @@ int main()
 	GLuint TextureObj;
 	glGenTextures(1, &TextureObj);
 	glBindTexture(GL_TEXTURE_2D, TextureObj);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, pottexture->width, pottexture->height, 0, GL_RGB, GL_FLOAT, pottexture->cleaneddata.data());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pottexture->width, pottexture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, pottexture->data.data());
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, TextureObj);
-	glEnableVertexAttribArray(2);
-	glBindTexture(GL_TEXTURE_2D, TextureObj);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-
 
 	// The timing to wait for V-Sync
 	glfwSwapInterval(1);

@@ -11,6 +11,7 @@ class Object
 public:
 	cy::TriMesh data;
 	cy::Point3f * sortedvn;
+	cy::Point2f * sortedvt;
 
 	Mesh * mesh;
 
@@ -71,7 +72,7 @@ public:
 
 	void organizeindiceorder()
 	{
-		int nubnu = data.NVN();
+		// Convert normal data
 		sortedvn = new cy::Point3f[data.NVN()];
 
 		int numberofface = data.NF();
@@ -81,6 +82,16 @@ public:
 			sortedvn[data.F(i).v[0]] = data.VN(data.FN(i).v[0]);
 			sortedvn[data.F(i).v[1]] = data.VN(data.FN(i).v[1]);
 			sortedvn[data.F(i).v[2]] = data.VN(data.FN(i).v[2]);
+		}
+
+		// Convert UV data
+		sortedvt = new cy::Point2f[data.NVT()];
+		for (int i = 0; i < data.NVT(); i++)
+		{
+			sortedvt[data.F(i).v[0]].x = Point2f(data.VT(data.FT(i).v[0])).x;
+			sortedvt[data.F(i).v[0]].y = Point2f(data.VT(data.FT(i).v[0])).y;
+			sortedvt[data.F(i).v[1]] = Point2f(data.VT(data.FT(i).v[1]));
+			sortedvt[data.F(i).v[2]] = Point2f(data.VT(data.FT(i).v[2]));
 		}
 
 		diffuse = glm::vec3(data.M(0).Kd[0], data.M(0).Kd[1], data.M(0).Kd[2]);
