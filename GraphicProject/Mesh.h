@@ -49,6 +49,7 @@ public:
 
 	void Load(const char * filename);
 	void Init();
+	void SetMaterial(Material * material);
 	void Update();
 
 

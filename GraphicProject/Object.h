@@ -35,5 +35,14 @@ public:
 	{
 		this->pos = pos;
 	}
+
+	void SetMesh(Mesh * mesh)
+	{
+		if (mesh)
+		{
+			this->mesh = mesh;
+			mesh->owner = this;
+		}
+	}
 };
 

@@ -48,14 +48,23 @@ void Mesh::Init()
 		data[tmpdata.F(i).v[2]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[2]));
 	}
 
-	// Set material info
-	material = new Material();
-	material->Ns = tmpdata.M(0).Ns;
-	for (int i = 0; i < 3; i++)
+	InitializeBuffer();
+}
+
+void Mesh::SetMaterial(Material * material)
+{
+	if (material)
 	{
-		material->Ka[i] = tmpdata.M(0).Ka[i];
-		material->Kd[i] = tmpdata.M(0).Kd[i];
-		material->Ks[i] = tmpdata.M(0).Ks[i];
+		this->material = material;
+
+		// Set material info
+		material->Ns = tmpdata.M(0).Ns;
+		for (int i = 0; i < 3; i++)
+		{
+			material->Ka[i] = tmpdata.M(0).Ka[i];
+			material->Kd[i] = tmpdata.M(0).Kd[i];
+			material->Ks[i] = tmpdata.M(0).Ks[i];
+		}
 	}
 }
 

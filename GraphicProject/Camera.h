@@ -7,7 +7,6 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 #include <mutex>
-extern std::mutex mtx;
 
 #include <stdio.h>
 
@@ -54,19 +53,15 @@ public:
 
 	void MoveCamera(float amount, glm::vec3 & dir)
 	{
-		mtx.lock();
 		vel = amount * dir;
-		mtx.unlock();
 	}
 
 	void Update(float dt)
 	{
-		if (mtx.try_lock())
-		{
-			//printf("The value of x:%f y:%f z:%f is \n" ,pos.x, pos.y, pos.z);
-			pos += (float)dt * vel;
-			view = glm::lookAt(pos, pos + forwardvec, upvec);
-			mtx.unlock();
-		}
+
+		//printf("The value of x:%f y:%f z:%f is \n" ,pos.x, pos.y, pos.z);
+		pos += (float)dt * vel;
+		view = glm::lookAt(pos, pos + forwardvec, upvec);
+
 	}
 };

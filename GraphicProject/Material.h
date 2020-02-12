@@ -14,7 +14,12 @@ public:
 
 	// Functions for openGL
 public:
-	GLuint s_programId = 0;
+	GLuint programid = 0;
+	void Load(const char * vert, const char * frag);
+	void BindShader();
+
+private:
+	bool ReadShaderSource(const char* filename, std::vector<GLchar> &buffer);
 };
 
 class Texture

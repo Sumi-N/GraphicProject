@@ -11,7 +11,6 @@
 
 extern Object teapot;
 extern Camera camera;
-extern std::mutex mtx;
 
 struct DataRequiredForBuffer
 {
@@ -52,25 +51,7 @@ namespace Application {
 	{
 		printf("I start the other thread\n");
 
-		mtx.lock();
-
-		// Load teapot data
-		teapot.mesh = new Mesh();
-		// Register the owner
-		teapot.mesh->owner = &teapot;
-		teapot.mesh->Load("../Objfiles/teapot.obj");
-		teapot.mesh->Init();
-		teapot.mesh->texture = new Texture();
-		teapot.mesh->texture->Load("../Objfiles/brick.png");
-
-		// Setting up position 
-		teapot.pos = glm::vec3(0, 0, -50);
-		teapot.scale = glm::vec3(1.0, 1.0, 1.0);
-		teapot.rot = glm::vec3(-90, 0, 0);
-
 		GameThread gamethread;
-
-		mtx.unlock();
 
 		gamethread.Init();
 		gamethread.Run();

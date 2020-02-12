@@ -5,7 +5,6 @@
 extern GLFWwindow * window;
 extern Camera camera;
 extern GLuint program;
-extern std::mutex mtx;
 
 namespace Input {
 
@@ -26,15 +25,11 @@ namespace Input {
 
 	void keyCallback(GLFWwindow * window, int key, int scancode, int action, int mods) 
 	{
-		//mtx.lock();
-
 		glm::vec3 zero = glm::vec3(0, 0, 0);
 		camera.MoveCamera(0, zero);
 
-		mtx.lock();
 		glm::vec3 up = camera.forwardvec;
 		glm::vec3 right = camera.rightvec;
-		mtx.unlock();
 
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
@@ -66,8 +61,6 @@ namespace Input {
 		{
 			camera.Translate(camera.pos + 0.5f * right);
 		}
-
-		//mtx.unlock();
 	}
 
 	void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
@@ -104,8 +97,6 @@ namespace Input {
 		mousestate.xpos = xpos;
 		mousestate.ypos = ypos;
 
-		mtx.lock();
-
 		glm::vec3 up = glm::vec3(0, 1, 0);
 		glm::vec3 right = camera.rightvec;
 
@@ -132,8 +123,6 @@ namespace Input {
 				camera.RotateAround(-1, right);
 			}
 		}
-
-		mtx.unlock();
 
 		return;
 	}

@@ -20,7 +20,6 @@
 #include <mutex>
 #include "GameThread.h"
 
-std::mutex mtx;
 Event FinishSubmittingAllDataFromGameThread;
 Event CanSubmitDataFromApplicationThread;
 
@@ -31,7 +30,28 @@ Camera camera;
 Object teapot;
 AmbientLight ambientlight;
 PointLight pointlight;
-glm::vec3 velocity;
+GLuint program;
+
+void InitializeObject()
+{
+	Mesh* mesh = new Mesh();
+	mesh->Load("../Objfiles/teapot.obj");
+	mesh->Init();
+
+	Material* material = new Material();
+	material->Load("point.vert.glsl", "point.frag.glsl");
+
+	teapot.SetMesh(mesh);
+	teapot.mesh->SetMaterial(material);
+
+	teapot.mesh->texture = new Texture();
+	teapot.mesh->texture->Load("../Objfiles/brick.png");
+
+	// Setting up position 
+	teapot.pos = glm::vec3(0, 0, -50);
+	teapot.scale = glm::vec3(1.0, 1.0, 1.0);
+	teapot.rot = glm::vec3(-90, 0, 0);
+}
 
 int initialize()
 {
@@ -90,13 +110,15 @@ int initialize()
 
 	FinishSubmittingAllDataFromGameThread.Initialize(EventType::ResetAutomatically);
 	CanSubmitDataFromApplicationThread.Initialize(EventType::ResetAutomatically, EventState::Signaled);
+
+	InitializeObject();
 }
 
 int main()
 {
-	std::thread gamethread(Application::Init);
-
 	initialize();
+
+	std::thread gamethread(Application::Init);
 
 	// Setup Light
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
@@ -105,32 +127,6 @@ int main()
 
 	Texture * pottexturespecular = new Texture;
 	pottexturespecular->Load("../Objfiles/brick-specular.png");
-
-	GLuint VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	GLuint IndexBuffer;
-	glGenBuffers(1, &IndexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, teapot.mesh->index.size() * sizeof(teapot.mesh->index[0]), teapot.mesh->index.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
-
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, teapot.mesh->data.size() * sizeof(teapot.mesh->data[0]), teapot.mesh->data.data(), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(teapot.mesh->data[0]), (void*)(0));
-
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(teapot.mesh->data[0]), (void*)(sizeof(cy::Point3f)));
-
-	glEnableVertexAttribArray(2);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(teapot.mesh->data[0]), (void*)(2 * sizeof(cy::Point3f)));
 
 	GLuint TextureObj;
 	glGenTextures(1, &TextureObj);
@@ -156,9 +152,7 @@ int main()
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, TextureObj);
 
-
-
-	GLuint program = FileLoader::loadShaderProgram(VERTEXSHADERPATH, FRAGMENTSHADERPATH);
+	program = teapot.mesh->material->programid;
 
 	GLint mvplocation = glGetUniformLocation(program, "mvp");
 	if (mvplocation == -1)
@@ -226,9 +220,6 @@ int main()
 		std::cerr << "The gSampler2 variable doesn't exist in the shader file" << std::endl;
 	}
 
-	// Use graphic pipeline
-	glUseProgram(program);
-
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
 		glfwPollEvents();
@@ -236,6 +227,9 @@ int main()
 		// clear window
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
+		// Use graphic pipeline
+		
+		glUseProgram(program);
 
 		//if (mtx.try_lock())
 		{

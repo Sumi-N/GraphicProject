@@ -44,8 +44,8 @@
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="point.frag" />
-    <None Include="point.vert" />
+    <None Include="point.frag.glsl" />
+    <None Include="point.vert.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
