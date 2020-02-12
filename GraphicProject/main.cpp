@@ -80,43 +80,35 @@ int main()
 
 	GLuint VAO;
 	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
 
 	GLuint VBO;
-	glBindVertexArray(VAO);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, teapot.data.NV() * sizeof(teapot.data.V(0)), &teapot.data.V(0), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, teapot.mesh->data.size() * sizeof(MeshData), teapot.mesh->data.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshData), (void*)(0));
 
-	GLuint NormalBuffer;
-	glGenBuffers(1, &NormalBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, NormalBuffer);
-	glBufferData(GL_ARRAY_BUFFER, teapot.data.NF() * sizeof(teapot.sortedvn[0]), &teapot.sortedvn[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, NormalBuffer);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(MeshData), (void*)(sizeof(cy::Point3f)));
 
-	GLuint UVBuffer;
-	glGenBuffers(1, &UVBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);
-	glBufferData(GL_ARRAY_BUFFER, teapot.data.NF() * sizeof(teapot.sortedvt[0]), &teapot.sortedvt[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(2);
-	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(MeshData), (void*)(2 * sizeof(cy::Point3f)));
 
 	GLuint IndexBuffer;
 	glGenBuffers(1, &IndexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, teapot.data.NF() * sizeof(teapot.data.F(0)), &teapot.data.F(0), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, teapot.mesh->index.size() * sizeof(MeshData), teapot.mesh->index.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
 
 	GLuint TextureObj;
 	glGenTextures(1, &TextureObj);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, TextureObj);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pottexture->width, pottexture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, pottexture->data.data());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, teapot.mesh->texture->width, teapot.mesh->texture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, teapot.mesh->texture->data.data());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -233,9 +225,9 @@ int main()
 
 		pointlight.position = glm::vec4(pointlight.position, 1.0);
 
-		glm::mat4 modelmatrix = teapot.modelcoordinate;
-		glm::mat4 mvp = camera.perspective * camera.view * teapot.modelcoordinate;
-		glm::mat3 modelinversetranspose = teapot.modelinversetranspose;
+		glm::mat4 modelmatrix = teapot.mesh->model_pos_mat;
+		glm::mat4 mvp = camera.perspective * camera.view * teapot.mesh->model_pos_mat;
+		glm::mat3 modelinversetranspose = teapot.mesh->model_vec_mat;
 
 		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &mvp[0][0]);
 		glUniformMatrix4fv(modelmatrixlocation, 1, GL_FALSE, &modelmatrix[0][0]);
@@ -244,11 +236,11 @@ int main()
 		glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
 		glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
 		glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
-		glUniform3f(diffuselocation, teapot.diffuse.r, teapot.diffuse.g, teapot.diffuse.b);
-		glUniform4f(specularlocation, teapot.specular.r, teapot.specular.g, teapot.specular.b, teapot.specular.w);
+		glUniform3f(diffuselocation, teapot.mesh->material.Kd[0], teapot.mesh->material.Kd[1], teapot.mesh->material.Kd[2]);
+		glUniform4f(specularlocation, teapot.mesh->material.Ks[0], teapot.mesh->material.Ks[1], teapot.mesh->material.Ks[2], teapot.mesh->material.Ns);
 		glUniform1i(gSampler, 0);
 		glUniform1i(gSampler2, 1);
-		glDrawElements(GL_TRIANGLES, teapot.data.NF() * sizeof(teapot.data.F(0)), GL_UNSIGNED_INT, (void*)0);
+		glDrawElements(GL_TRIANGLES, teapot.mesh->index.size() * sizeof(MeshFace), GL_UNSIGNED_INT, (void*)0);
 
 		glfwSwapBuffers(window);
 	}

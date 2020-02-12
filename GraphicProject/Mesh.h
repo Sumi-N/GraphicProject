@@ -21,6 +21,8 @@ class Mesh
 {
 public:
 
+	Mesh();
+
 	// Components
 	class Object * owner;
 	Texture * texture;
@@ -36,8 +38,6 @@ public:
 
 	glm::mat4 model_pos_mat;
 	glm::mat3 model_vec_mat;
-
-	Mesh();
 
 	void Load(const char * filename);
 	void Init();

@@ -46,6 +46,8 @@ namespace Application {
 
 		// Load teapot data
 		teapot.mesh = new Mesh();
+		// Register the owner
+		teapot.mesh->owner = &teapot;
 		teapot.mesh->Load("../Objfiles/teapot.obj");
 		teapot.mesh->Init();
 		teapot.mesh->texture = new Texture();
@@ -53,8 +55,8 @@ namespace Application {
 
 		// Setting up position 
 		teapot.pos = glm::vec3(0, 0, -50);
-		teapot.scale = glm::vec3(1.0, 1.0, 2.0);
-		teapot.rot = glm::vec3(90, 0, 0);
+		teapot.scale = glm::vec3(1.0, 1.0, 1.0);
+		teapot.rot = glm::vec3(0, 0, 0);
 
 
 		GameThread gamethread;

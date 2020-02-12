@@ -3,6 +3,10 @@
 #include "Object.h"
 #include "Mesh.h"
 
+Mesh::Mesh()
+{
+}
+
 void Mesh::Load(const char * filename)
 {
 	tmpdata.LoadFromFileObj(filename, true);
@@ -36,10 +40,10 @@ void Mesh::Init()
 		data[tmpdata.F(i).v[1]].normal = tmpdata.VN(tmpdata.FN(i).v[1]);
 		data[tmpdata.F(i).v[2]].normal = tmpdata.VN(tmpdata.FN(i).v[2]);
 
-		// Sort uv coord to vertex index
-		data[tmpdata.F(i).v[0]].uv = cy::Point2f(tmpdata.VT(tmpdata.FN(i).v[0]));
-		data[tmpdata.F(i).v[1]].uv = cy::Point2f(tmpdata.VT(tmpdata.FN(i).v[1]));
-		data[tmpdata.F(i).v[2]].uv = cy::Point2f(tmpdata.VT(tmpdata.FN(i).v[2]));
+		// Sort uv coordinate to vertex index
+		data[tmpdata.F(i).v[0]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[0]));
+		data[tmpdata.F(i).v[1]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[1]));
+		data[tmpdata.F(i).v[2]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[2]));
 	}
 
 	// Set material info
