@@ -31,9 +31,10 @@ namespace Input {
 		glm::vec3 zero = glm::vec3(0, 0, 0);
 		camera.MoveCamera(0, zero);
 
-
+		mtx.lock();
 		glm::vec3 up = camera.forwardvec;
 		glm::vec3 right = camera.rightvec;
+		mtx.unlock();
 
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
@@ -47,22 +48,23 @@ namespace Input {
 
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.MoveCamera(0.01f, up);
+			//camera.MoveCamera(0.01f, up);
+			camera.Translate(camera.pos + 0.5f * up);
 		}
 
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.MoveCamera(-0.01f, up);
+			camera.Translate(camera.pos - 0.5f * up);
 		}
 
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.MoveCamera(-0.01f , right);
+			camera.Translate(camera.pos - 0.5f * right);
 		}
 
 		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			camera.MoveCamera(0.01f, right);
+			camera.Translate(camera.pos + 0.5f * right);
 		}
 
 		//mtx.unlock();

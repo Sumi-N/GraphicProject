@@ -19,6 +19,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Share">
+      <UniqueIdentifier>{cfe00432-97a9-491a-86bd-ad19da1e8b20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Timer.h">
@@ -55,7 +58,10 @@
       <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
-      <Filter>Header Files\GraphicsThread</Filter>
+      <Filter>Header Files\GameThread</Filter>
+    </ClInclude>
+    <ClInclude Include="Event.h">
+      <Filter>Header Files\Share</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +92,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GL/glew.h>
 #include <cyCodeBase/cyTriMesh.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
@@ -17,6 +18,13 @@ struct MeshData
 	cy::Point2f uv;
 };
 
+struct MeshBufferData
+{
+	GLuint vertexbufferid = 0;
+	GLuint indexbufferid = 0;
+	GLuint vertexarrayid = 0;
+};
+
 class Mesh
 {
 public:
@@ -26,7 +34,7 @@ public:
 	// Components
 	class Object * owner;
 	Texture * texture;
-	Material material;
+	Material * material;
 
 	cy::TriMesh tmpdata;
 	std::vector<MeshFace> index;
@@ -42,5 +50,11 @@ public:
 	void Load(const char * filename);
 	void Init();
 	void Update();
+
+
+	// Functions for openGL
+public:
+	MeshBufferData bufferdata;
+	void InitializeBuffer();
 };
 

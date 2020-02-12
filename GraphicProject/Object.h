@@ -31,7 +31,7 @@ public:
 		angacc   = glm::vec3(0.0, 0.0, 0.0);
 	}
 
-	void Translate(glm::vec3 & pos)
+	void Translate(glm::vec3 pos)
 	{
 		this->pos = pos;
 	}

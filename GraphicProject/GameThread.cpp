@@ -11,9 +11,15 @@
 
 extern Object teapot;
 extern Camera camera;
-//extern Timer  timer;
 extern std::mutex mtx;
-extern bool isReadyReadBuffer;
+
+struct DataRequiredForBuffer
+{
+	std::vector<Camera> camera;
+	std::vector<Mesh> meshlist;
+	std::vector<Texture> textureList;
+	std::vector<Material> materialList;
+};
 
 	GameThread::GameThread()
 	{
@@ -37,10 +43,7 @@ extern bool isReadyReadBuffer;
 			teapot.mesh->Update();
 			camera.Update(timer.time.dt);
 
-			//camera.pos += (float)timer.time.dt * camera.vel;
-			//camera.view = glm::lookAt(camera.pos, camera.pos + camera.forwardvec, camera.upvec);
 		}
-		printf("The timer time is %f\n", timer.time.dt);
 	}
 
 namespace Application {

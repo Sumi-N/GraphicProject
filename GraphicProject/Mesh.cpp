@@ -1,5 +1,7 @@
 #pragma once
 
+#include <GL/glew.h>
+
 #include "Object.h"
 #include "Mesh.h"
 
@@ -47,12 +49,13 @@ void Mesh::Init()
 	}
 
 	// Set material info
-	material.Ns = tmpdata.M(0).Ns;
+	material = new Material();
+	material->Ns = tmpdata.M(0).Ns;
 	for (int i = 0; i < 3; i++)
 	{
-		material.Ka[i] = tmpdata.M(0).Ka[i];
-		material.Kd[i] = tmpdata.M(0).Kd[i];
-		material.Ks[i] = tmpdata.M(0).Ks[i];
+		material->Ka[i] = tmpdata.M(0).Ka[i];
+		material->Kd[i] = tmpdata.M(0).Kd[i];
+		material->Ks[i] = tmpdata.M(0).Ks[i];
 	}
 }
 
@@ -69,4 +72,31 @@ void Mesh::Update()
 
 	model_pos_mat = translation_mat * rotation_mat * scale_mat;
 	model_vec_mat = glm::transpose(glm::inverse(glm::mat3(model_pos_mat)));
+}
+
+void Mesh::InitializeBuffer()
+{
+	// Create vertex array 
+	glGenVertexArrays(1, &bufferdata.vertexarrayid);
+	glBindVertexArray(bufferdata.vertexarrayid);
+
+	// Create vertex buffer 
+	glGenBuffers(1, &bufferdata.vertexbufferid);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferdata.vertexbufferid);
+
+	// Create index buffer
+	glGenBuffers(1, &bufferdata.indexbufferid);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferdata.indexbufferid);
+
+	// Set vertex data to vertex buffer
+	glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(data[0]), data.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index.size() * sizeof(index[0]), index.data(), GL_STATIC_DRAW);
+
+	// Enable vertex attribute
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(data[0]), (void*)(0));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(data[0]), (void*)(sizeof(cy::Point3f)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(data[0]), (void*)(2 * sizeof(cy::Point3f)));
 }

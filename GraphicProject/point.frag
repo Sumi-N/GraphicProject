@@ -16,7 +16,7 @@ uniform sampler2D gSampler2;
 
 void main()
 {
-	fragment = vec4(ambientintensityout.x * diffuseout.x, ambientintensityout.y * diffuseout.y, ambientintensityout.z * diffuseout.z, 1.0);
+	fragment = texture2D(gSampler, TexCoord0.st) * vec4(ambientintensityout.x * diffuseout.x, ambientintensityout.y * diffuseout.y, ambientintensityout.z * diffuseout.z, 1.0);
 	
 	float costheta = dot(normalvetor, pointlightdirectioncout);
 	
@@ -30,6 +30,4 @@ void main()
 			fragment += texture2D(gSampler2, TexCoord0.st) * vec4(vec3(specularout) * pow(dot(h, normalvetor), specularout.w), 1.0);
 		}
 	}
-
-	//fragment += texture2D(gSampler, TexCoord0.st);
 }

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Event.cpp" />
     <ClCompile Include="FileLoader.cpp" />
     <ClCompile Include="GameThread.cpp" />
     <ClCompile Include="lodepng.cpp" />
@@ -30,6 +31,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Constatnt.h" />
+    <ClInclude Include="Event.h" />
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="GameThread.h" />
     <ClInclude Include="Input.h" />

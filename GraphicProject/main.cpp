@@ -13,6 +13,7 @@
 #include "Input.h"
 #include "Camera.h"
 #include "Light.h"
+#include "Event.h"
 
 // About threading
 #include <thread>
@@ -20,22 +21,20 @@
 #include "GameThread.h"
 
 std::mutex mtx;
+Event FinishSubmittingAllDataFromGameThread;
+Event CanSubmitDataFromApplicationThread;
 
+
+//////////////////////Global Data
 GLFWwindow * window;
 Camera camera;
 Object teapot;
 AmbientLight ambientlight;
 PointLight pointlight;
 glm::vec3 velocity;
-//Timer timer;
-//bool isReadyReadBuffer = false;
 
-int main()
+int initialize()
 {
-	//timer.Init();
-	// Start the game thread
-	std::thread gamethread(Application::Init);
-
 	// Initialize GLFW
 	if (glfwInit() == GL_FALSE)
 	{
@@ -67,10 +66,37 @@ int main()
 
 	// Initialize GLEW
 	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
+	if (glewInit() != GLEW_OK)
+	{
 		std::cerr << "Can't initialize GLEW" << std::endl;
 		return 1;
 	}
+
+	// The timing to wait for V-Sync
+	glfwSwapInterval(1);
+
+	// Set background color
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+	// Set up callback
+	glfwSetKeyCallback(window, Input::keyCallback);
+	glfwSetMouseButtonCallback(window, Input::mouseButtonCallback);
+	glfwSetCursorPosCallback(window, Input::cursorPositionCallback);
+
+	// Set up culling
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	FinishSubmittingAllDataFromGameThread.Initialize(EventType::ResetAutomatically);
+	CanSubmitDataFromApplicationThread.Initialize(EventType::ResetAutomatically, EventState::Signaled);
+}
+
+int main()
+{
+	std::thread gamethread(Application::Init);
+
+	initialize();
 
 	// Setup Light
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
@@ -130,11 +156,7 @@ int main()
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, TextureObj);
 
-	// The timing to wait for V-Sync
-	glfwSwapInterval(1);
 
-	// Set background color
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	GLuint program = FileLoader::loadShaderProgram(VERTEXSHADERPATH, FRAGMENTSHADERPATH);
 
@@ -207,26 +229,13 @@ int main()
 	// Use graphic pipeline
 	glUseProgram(program);
 
-	glfwSetKeyCallback(window, Input::keyCallback);
-	glfwSetMouseButtonCallback(window, Input::mouseButtonCallback);
-	glfwSetCursorPosCallback(window, Input::cursorPositionCallback);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
-		//camera.Update(timer.time.dt);
-
 		glfwPollEvents();
 
 		// clear window
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		// Draw call
-
-		pointlight.position = glm::vec4(pointlight.position, 1.0);
 
 		//if (mtx.try_lock())
 		{
@@ -236,15 +245,17 @@ int main()
 			glm::vec3 camerapos = camera.pos;
 			//mtx.unlock();
 
+			// Lighting data
+			glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
+			glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
+			glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
+
 			glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &mvp[0][0]);
 			glUniformMatrix4fv(modelmatrixlocation, 1, GL_FALSE, &modelmatrix[0][0]);
 			glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &modelinversetranspose[0][0]);
 			glUniform3f(cameraposition, camerapos.x, camerapos.y, camerapos.z);
-			glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
-			glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
-			glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
-			glUniform3f(diffuselocation, teapot.mesh->material.Kd[0], teapot.mesh->material.Kd[1], teapot.mesh->material.Kd[2]);
-			glUniform4f(specularlocation, teapot.mesh->material.Ks[0], teapot.mesh->material.Ks[1], teapot.mesh->material.Ks[2], teapot.mesh->material.Ns);
+			glUniform3f(diffuselocation, teapot.mesh->material->Kd[0], teapot.mesh->material->Kd[1], teapot.mesh->material->Kd[2]);
+			glUniform4f(specularlocation, teapot.mesh->material->Ks[0], teapot.mesh->material->Ks[1], teapot.mesh->material->Ks[2], teapot.mesh->material->Ns);
 			glUniform1i(gSampler, 0);
 			glUniform1i(gSampler2, 1);
 			glDrawElements(GL_TRIANGLES, teapot.mesh->index.size() * sizeof(teapot.mesh->index[0]), GL_UNSIGNED_INT, (void*)0);
@@ -252,11 +263,5 @@ int main()
 			glfwSwapBuffers(window);
 
 		}
-		//else
-		{
-			//printf("heaven\n");
-		}
-
-
 	}
 }
