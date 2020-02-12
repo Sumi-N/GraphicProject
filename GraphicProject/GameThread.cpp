@@ -11,10 +11,9 @@
 
 extern Object teapot;
 extern Camera camera;
-extern Timer  timer;
+//extern Timer  timer;
 extern std::mutex mtx;
-
-namespace Application {
+extern bool isReadyReadBuffer;
 
 	GameThread::GameThread()
 	{
@@ -37,12 +36,20 @@ namespace Application {
 			timer.Run();
 			teapot.mesh->Update();
 			camera.Update(timer.time.dt);
+
+			//camera.pos += (float)timer.time.dt * camera.vel;
+			//camera.view = glm::lookAt(camera.pos, camera.pos + camera.forwardvec, camera.upvec);
 		}
+		printf("The timer time is %f\n", timer.time.dt);
 	}
+
+namespace Application {
 
 	int Init()
 	{
 		printf("I start the other thread\n");
+
+		mtx.lock();
 
 		// Load teapot data
 		teapot.mesh = new Mesh();
@@ -56,10 +63,11 @@ namespace Application {
 		// Setting up position 
 		teapot.pos = glm::vec3(0, 0, -50);
 		teapot.scale = glm::vec3(1.0, 1.0, 1.0);
-		teapot.rot = glm::vec3(0, 0, 0);
-
+		teapot.rot = glm::vec3(-90, 0, 0);
 
 		GameThread gamethread;
+
+		mtx.unlock();
 
 		gamethread.Init();
 		gamethread.Run();

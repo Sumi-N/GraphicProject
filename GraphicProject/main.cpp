@@ -26,9 +26,13 @@ Camera camera;
 Object teapot;
 AmbientLight ambientlight;
 PointLight pointlight;
+glm::vec3 velocity;
+//Timer timer;
+//bool isReadyReadBuffer = false;
 
 int main()
 {
+	//timer.Init();
 	// Start the game thread
 	std::thread gamethread(Application::Init);
 
@@ -73,8 +77,6 @@ int main()
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
 	pointlight.position = glm::vec3(20, 20, -50);
 
-	//Texture * pottexture = new Texture;
-	//pottexture->Load("../Objfiles/brick.png");
 	Texture * pottexturespecular = new Texture;
 	pottexturespecular->Load("../Objfiles/brick-specular.png");
 
@@ -82,27 +84,27 @@ int main()
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, teapot.mesh->data.size() * sizeof(MeshData), teapot.mesh->data.data(), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshData), (void*)(0));
-
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(MeshData), (void*)(sizeof(cy::Point3f)));
-
-	glEnableVertexAttribArray(2);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(MeshData), (void*)(2 * sizeof(cy::Point3f)));
-
 	GLuint IndexBuffer;
 	glGenBuffers(1, &IndexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, teapot.mesh->index.size() * sizeof(MeshData), teapot.mesh->index.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, teapot.mesh->index.size() * sizeof(teapot.mesh->index[0]), teapot.mesh->index.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
+
+	GLuint VBO;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, teapot.mesh->data.size() * sizeof(teapot.mesh->data[0]), teapot.mesh->data.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(teapot.mesh->data[0]), (void*)(0));
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(teapot.mesh->data[0]), (void*)(sizeof(cy::Point3f)));
+
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(teapot.mesh->data[0]), (void*)(2 * sizeof(cy::Point3f)));
 
 	GLuint TextureObj;
 	glGenTextures(1, &TextureObj);
@@ -215,7 +217,8 @@ int main()
 
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
-		// call callback
+		//camera.Update(timer.time.dt);
+
 		glfwPollEvents();
 
 		// clear window
@@ -225,23 +228,35 @@ int main()
 
 		pointlight.position = glm::vec4(pointlight.position, 1.0);
 
-		glm::mat4 modelmatrix = teapot.mesh->model_pos_mat;
-		glm::mat4 mvp = camera.perspective * camera.view * teapot.mesh->model_pos_mat;
-		glm::mat3 modelinversetranspose = teapot.mesh->model_vec_mat;
+		//if (mtx.try_lock())
+		{
+			glm::mat4 modelmatrix = teapot.mesh->model_pos_mat;
+			glm::mat4 mvp = camera.perspective * camera.view * teapot.mesh->model_pos_mat;
+			glm::mat3 modelinversetranspose = teapot.mesh->model_vec_mat;
+			glm::vec3 camerapos = camera.pos;
+			//mtx.unlock();
 
-		glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &mvp[0][0]);
-		glUniformMatrix4fv(modelmatrixlocation, 1, GL_FALSE, &modelmatrix[0][0]);
-		glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &modelinversetranspose[0][0]);
-		glUniform3f(cameraposition, camera.pos.x, camera.pos.y, camera.pos.y);
-		glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
-		glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
-		glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
-		glUniform3f(diffuselocation, teapot.mesh->material.Kd[0], teapot.mesh->material.Kd[1], teapot.mesh->material.Kd[2]);
-		glUniform4f(specularlocation, teapot.mesh->material.Ks[0], teapot.mesh->material.Ks[1], teapot.mesh->material.Ks[2], teapot.mesh->material.Ns);
-		glUniform1i(gSampler, 0);
-		glUniform1i(gSampler2, 1);
-		glDrawElements(GL_TRIANGLES, teapot.mesh->index.size() * sizeof(MeshFace), GL_UNSIGNED_INT, (void*)0);
+			glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &mvp[0][0]);
+			glUniformMatrix4fv(modelmatrixlocation, 1, GL_FALSE, &modelmatrix[0][0]);
+			glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &modelinversetranspose[0][0]);
+			glUniform3f(cameraposition, camerapos.x, camerapos.y, camerapos.z);
+			glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
+			glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
+			glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
+			glUniform3f(diffuselocation, teapot.mesh->material.Kd[0], teapot.mesh->material.Kd[1], teapot.mesh->material.Kd[2]);
+			glUniform4f(specularlocation, teapot.mesh->material.Ks[0], teapot.mesh->material.Ks[1], teapot.mesh->material.Ks[2], teapot.mesh->material.Ns);
+			glUniform1i(gSampler, 0);
+			glUniform1i(gSampler2, 1);
+			glDrawElements(GL_TRIANGLES, teapot.mesh->index.size() * sizeof(teapot.mesh->index[0]), GL_UNSIGNED_INT, (void*)0);
 
-		glfwSwapBuffers(window);
+			glfwSwapBuffers(window);
+
+		}
+		//else
+		{
+			//printf("heaven\n");
+		}
+
+
 	}
 }

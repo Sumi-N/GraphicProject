@@ -26,7 +26,6 @@ out vec2 TexCoord0;
 void main()
 {
 	gl_Position = mvp * vec4(position, 1);
-	//normalvetor = abs(normalize(mtranspose * normal));
 	normalvetor = normalize(mtranspose * normal);
 	ambientintensityout = ambientintensity;
 	seeangle = normalize(cameraposition -  vec3(modelmatrix * vec4(position,1)));
