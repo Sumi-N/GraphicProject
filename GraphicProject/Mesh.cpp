@@ -83,6 +83,11 @@ void Mesh::Update()
 	model_vec_mat = glm::transpose(glm::inverse(glm::mat3(model_pos_mat)));
 }
 
+void Mesh::Draw()
+{
+	glDrawElements(GL_TRIANGLES, index.size() * sizeof(index[0]), GL_UNSIGNED_INT, (void*)0);
+}
+
 void Mesh::InitializeBuffer()
 {
 	// Create vertex array 

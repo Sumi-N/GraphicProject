@@ -51,6 +51,7 @@ public:
 	void Init();
 	void SetMaterial(Material * material);
 	void Update();
+	void Draw();
 
 
 	// Functions for openGL

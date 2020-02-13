@@ -14,14 +14,17 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Event.h"
+#include "ConstantBuffer.h"
 
 struct DataRequiredForBuffer
 {
-	std::vector<Camera> camera;
-	std::vector<Mesh> meshlist;
-	std::vector<Texture> textureList;
-	std::vector<Material> materialList;
+	ConstantBufferFormat::Frame frame;
+	std::vector<ConstantBufferFormat::DrawCall> drawcalllist;
+	std::vector<Object *> objectlist;
 };
+
+ConstantBuffer const_buffer_frame(ConstantBufferTypes::Frame);
+ConstantBuffer const_buffer_drawcall(ConstantBufferTypes::DrawCall);
 
 DataRequiredForBuffer dataRequiredForBuffer[2];
 DataRequiredForBuffer * BeginSubmittedByGameThread = &dataRequiredForBuffer[0];
@@ -42,6 +45,21 @@ bool WaitUntilDataCanSubmitFromApplicationThread(const double i_timetowait)
 void SignalTheDataHasBeenSubmitted()
 {
 	FinishSubmittingAllDataFromGameThread.Signal();
+}
+
+void SubmitObjectData(Object * obj)
+{
+	BeginSubmittedByGameThread->objectlist.push_back(obj);
+	ConstantBufferFormat::DrawCall drawcall;
+	drawcall.mit = obj->mesh->model_vec_mat;
+	drawcall.mwt = obj->mesh->model_pos_mat;
+	BeginSubmittedByGameThread->drawcalllist.push_back(drawcall);
+}
+
+void SubmitCameraData(Camera * camera)
+{
+	BeginSubmittedByGameThread->frame.cwp = camera->pos;
+	BeginSubmittedByGameThread->frame.cvp = camera->view_perspective_mat;
 }
 
 // About threading
@@ -79,7 +97,7 @@ void InitializeObject()
 	teapot.rot = glm::vec3(-90, 0, 0);
 }
 
-int initialize()
+int Initialize()
 {
 	// Initialize GLFW
 	if (glfwInit() == GL_FALSE)
@@ -137,12 +155,16 @@ int initialize()
 	FinishSubmittingAllDataFromGameThread.Initialize(EventType::ResetAutomatically);
 	CanSubmitDataFromApplicationThread.Initialize(EventType::ResetAutomatically, EventState::Signaled);
 
+	// Bind Uniform buffer
+	const_buffer_drawcall.Bind();
+	const_buffer_frame.Bind();
+
 	InitializeObject();
 }
 
 int main()
 {
-	initialize();
+	Initialize();
 
 	std::thread gamethread(Application::Init);
 
@@ -180,29 +202,29 @@ int main()
 
 	program = teapot.mesh->material->programid;
 
-	GLint mvplocation = glGetUniformLocation(program, "mvp");
-	if (mvplocation == -1)
-	{
-		std::cerr << "The mvplocation variable doesn't exist in the shader file" << std::endl;
-	}
+	//GLint mvplocation = glGetUniformLocation(program, "mvp");
+	//if (mvplocation == -1)
+	//{
+	//	std::cerr << "The mvplocation variable doesn't exist in the shader file" << std::endl;
+	//}
 
-	GLint modelmatrixlocation = glGetUniformLocation(program, "modelmatrix");
-	if (modelmatrixlocation == -1)
-	{
-		std::cerr << "The modelmatrix variable doesn't exist in the shader file" << std::endl;
-	}
+	//GLint modelmatrixlocation = glGetUniformLocation(program, "modelmatrix");
+	//if (modelmatrixlocation == -1)
+	//{
+	//	std::cerr << "The modelmatrix variable doesn't exist in the shader file" << std::endl;
+	//}
 
-	GLint cameraposition = glGetUniformLocation(program, "cameraposition");
-	if (cameraposition == -1)
-	{
-		std::cerr << "The cameraposition variable doesn't exist in the shader file" << std::endl;
-	}
+	//GLint cameraposition = glGetUniformLocation(program, "cameraposition");
+	//if (cameraposition == -1)
+	//{
+	//	std::cerr << "The cameraposition variable doesn't exist in the shader file" << std::endl;
+	//}
 
-	GLint mtransposelocation = glGetUniformLocation(program, "mtranspose");
-	if (mtransposelocation == -1)
-	{
-		std::cerr << "The mtransposelocation variable doesn't exist in the shader file" << std::endl;
-	}
+	//GLint mtransposelocation = glGetUniformLocation(program, "mtranspose");
+	//if (mtransposelocation == -1)
+	//{
+	//	std::cerr << "The mtransposelocation variable doesn't exist in the shader file" << std::endl;
+	//}
 
 	GLint ambientintensity = glGetUniformLocation(program, "ambientintensity");
 	if (ambientintensity == -1)
@@ -252,7 +274,7 @@ int main()
 		if (result)
 		{
 			std::swap(BeginSubmittedByGameThread, BeginRenderedByRenderThread);
-			std::swap(BeginSubmittedByRenderThread, BeginReadByGameThread);
+			std::swap(BeginReadByGameThread, BeginSubmittedByRenderThread);
 			bool result = CanSubmitDataFromApplicationThread.Signal();
 		}
 
@@ -266,31 +288,35 @@ int main()
 
 		glfwPollEvents();
 		
-		glUseProgram(program);
 
 		{
-			glm::mat4 modelmatrix = teapot.mesh->model_pos_mat;
-			glm::mat4 mvp = camera.perspective * camera.view * teapot.mesh->model_pos_mat;
-			glm::mat3 modelinversetranspose = teapot.mesh->model_vec_mat;
-			glm::vec3 camerapos = camera.pos;
+			auto & const_data_frame = BeginRenderedByRenderThread->frame;
+			const_buffer_frame.Update(&const_data_frame);
+
+			glUniform3f(diffuselocation, teapot.mesh->material->Kd[0], teapot.mesh->material->Kd[1], teapot.mesh->material->Kd[2]);
+			glUniform4f(specularlocation, teapot.mesh->material->Ks[0], teapot.mesh->material->Ks[1], teapot.mesh->material->Ks[2], teapot.mesh->material->Ns);
+			glUniform1i(gSampler, 0);
+			glUniform1i(gSampler2, 1);
 
 			// Lighting data
 			glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
 			glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
 			glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
 
-			glUniformMatrix4fv(mvplocation, 1, GL_FALSE, &mvp[0][0]);
-			glUniformMatrix4fv(modelmatrixlocation, 1, GL_FALSE, &modelmatrix[0][0]);
-			glUniformMatrix3fv(mtransposelocation, 1, GL_FALSE, &modelinversetranspose[0][0]);
-			glUniform3f(cameraposition, camerapos.x, camerapos.y, camerapos.z);
-			glUniform3f(diffuselocation, teapot.mesh->material->Kd[0], teapot.mesh->material->Kd[1], teapot.mesh->material->Kd[2]);
-			glUniform4f(specularlocation, teapot.mesh->material->Ks[0], teapot.mesh->material->Ks[1], teapot.mesh->material->Ks[2], teapot.mesh->material->Ns);
-			glUniform1i(gSampler, 0);
-			glUniform1i(gSampler2, 1);
-			glDrawElements(GL_TRIANGLES, teapot.mesh->index.size() * sizeof(teapot.mesh->index[0]), GL_UNSIGNED_INT, (void*)0);
+			for (int i = 0; i < BeginRenderedByRenderThread->objectlist.size(); i++)
+			{
+				auto & const_data_draw = BeginRenderedByRenderThread->drawcalllist[i];
+				const_data_draw.mvp =  const_data_frame.cvp * const_data_draw.mwt;
+				const_buffer_drawcall.Update(&const_data_draw);
+				BeginRenderedByRenderThread->objectlist[i]->mesh->material->BindShader();
+				BeginRenderedByRenderThread->objectlist[i]->mesh->Draw();
+			}
+			
 
 			glfwSwapBuffers(window);
 
+			BeginRenderedByRenderThread->objectlist.clear();
+			BeginRenderedByRenderThread->drawcalllist.clear();
 		}
 	}
 }

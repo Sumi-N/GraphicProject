@@ -16,6 +16,7 @@ public:
 	glm::mat4 view;
 	glm::mat4 perspective;
 	glm::mat4 orthographics;
+	glm::mat4 view_perspective_mat;
 
 	glm::vec3 forwardvec;
 	glm::vec3 upvec;
@@ -58,10 +59,8 @@ public:
 
 	void Update(float dt)
 	{
-
-		//printf("The value of x:%f y:%f z:%f is \n" ,pos.x, pos.y, pos.z);
 		pos += (float)dt * vel;
 		view = glm::lookAt(pos, pos + forwardvec, upvec);
-
+		view_perspective_mat = perspective * view;
 	}
 };

@@ -46,27 +46,22 @@ namespace Input {
 
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			//camera.MoveCamera(0.01f, up);
 			BeginSubmittedByRenderThread->up = true;
-			//camera.Translate(camera.pos + 0.5f * up);
 		}
 
 		if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
 			BeginSubmittedByRenderThread->down = true;
-			//camera.Translate(camera.pos - 0.5f * up);
 		}
 
 		if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
 			BeginSubmittedByRenderThread->left = true;
-			//camera.Translate(camera.pos - 0.5f * right);
 		}
 
 		if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
 			BeginSubmittedByRenderThread->right = true;
-			//camera.Translate(camera.pos + 0.5f * right);
 		}
 	}
 

@@ -1,8 +1,13 @@
 #pragma once
+#include "Object.h"
+#include "Camera.h"
 
 bool WaitUntilDataCanSubmitFromApplicationThread(const double i_timetowait);
 
 void SignalTheDataHasBeenSubmitted();
+
+void SubmitObjectData(Object * obj);
+void SubmitCameraData(Camera * camera);
 
 struct DataRequiredForGameThread
 {

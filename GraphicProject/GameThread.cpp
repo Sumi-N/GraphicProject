@@ -13,6 +13,7 @@
 extern Object teapot;
 extern Camera camera;
 extern DataRequiredForGameThread * BeginReadByGameThread;
+extern DataRequiredForGameThread * BeginSubmittedByRenderThread;
 
 	GameThread::GameThread()
 	{
@@ -32,33 +33,29 @@ extern DataRequiredForGameThread * BeginReadByGameThread;
 	{
 		while (true)
 		{
-			timer.Run();
-			teapot.mesh->Update();
-			camera.Update(timer.time.dt);
-
 			if (BeginReadByGameThread->up)
 			{
 				camera.MoveCamera(0.01f, camera.forwardvec);
-				//camera.Translate(camera.pos + 0.5f * camera.forwardvec);
 			}
 
 			if (BeginReadByGameThread->down)
 			{
 				camera.MoveCamera(-0.01f, camera.forwardvec);
-				//camera.Translate(camera.pos - 0.5f * camera.forwardvec);
 			}
 
 			if (BeginReadByGameThread->left)
 			{
 				camera.MoveCamera(-0.01f, camera.rightvec);
-				//camera.Translate(camera.pos - 0.5f * camera.rightvec);
 			}
 
 			if (BeginReadByGameThread->right)
 			{
 				camera.MoveCamera(0.01f, camera.rightvec);
-				//camera.Translate(camera.pos + 0.5f * camera.rightvec);
 			}
+
+			timer.Run();
+			teapot.mesh->Update();
+			camera.Update(timer.time.dt);
 
 			// Check if render thread is ready to get date from game thread
 			bool canSubmitDataToRenderThread;
@@ -69,6 +66,8 @@ extern DataRequiredForGameThread * BeginReadByGameThread;
 
 			{
 				// Submit data in this scope
+				SubmitObjectData(&teapot);
+				SubmitCameraData(&camera);
 			}
 
 			SignalTheDataHasBeenSubmitted();
