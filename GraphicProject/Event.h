@@ -20,10 +20,10 @@ public:
 	~Event();
 
 	void Initialize(const EventType i_type, const EventState i_initialstate = EventState::Unsignaled);
-
-	void Signal();
+	bool Signal();
 	void ResetToUnsignaled();
 
 	HANDLE m_handle = NULL;
 };
 
+bool WaitForEvent(const Event & i_event, const double i_timetowait);

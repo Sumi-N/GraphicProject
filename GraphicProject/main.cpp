@@ -1,5 +1,6 @@
 #pragma once
 
+#include "main.h"
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -10,19 +11,44 @@
 #include "Constatnt.h"
 #include "Utility.h"
 #include "FileLoader.h"
-#include "Input.h"
 #include "Camera.h"
 #include "Light.h"
 #include "Event.h"
+
+struct DataRequiredForBuffer
+{
+	std::vector<Camera> camera;
+	std::vector<Mesh> meshlist;
+	std::vector<Texture> textureList;
+	std::vector<Material> materialList;
+};
+
+DataRequiredForBuffer dataRequiredForBuffer[2];
+DataRequiredForBuffer * BeginSubmittedByGameThread = &dataRequiredForBuffer[0];
+DataRequiredForBuffer * BeginRenderedByRenderThread = &dataRequiredForBuffer[1];
+
+DataRequiredForGameThread dataRequiredForGameThread[2];
+DataRequiredForGameThread * BeginSubmittedByRenderThread = &dataRequiredForGameThread[0];
+DataRequiredForGameThread * BeginReadByGameThread = &dataRequiredForGameThread[1];
+
+Event FinishSubmittingAllDataFromGameThread;
+Event CanSubmitDataFromApplicationThread;
+
+bool WaitUntilDataCanSubmitFromApplicationThread(const double i_timetowait)
+{
+	return WaitForEvent(CanSubmitDataFromApplicationThread, i_timetowait);
+}
+
+void SignalTheDataHasBeenSubmitted()
+{
+	FinishSubmittingAllDataFromGameThread.Signal();
+}
 
 // About threading
 #include <thread>
 #include <mutex>
 #include "GameThread.h"
-
-Event FinishSubmittingAllDataFromGameThread;
-Event CanSubmitDataFromApplicationThread;
-
+#include "Input.h"
 
 //////////////////////Global Data
 GLFWwindow * window;
@@ -42,7 +68,7 @@ void InitializeObject()
 	material->Load("point.vert.glsl", "point.frag.glsl");
 
 	teapot.SetMesh(mesh);
-	teapot.mesh->SetMaterial(material);
+	mesh->SetMaterial(material);
 
 	teapot.mesh->texture = new Texture();
 	teapot.mesh->texture->Load("../Objfiles/brick.png");
@@ -222,22 +248,31 @@ int main()
 
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
-		glfwPollEvents();
+		bool result = WaitForEvent(FinishSubmittingAllDataFromGameThread, 100000);
+		if (result)
+		{
+			std::swap(BeginSubmittedByGameThread, BeginRenderedByRenderThread);
+			std::swap(BeginSubmittedByRenderThread, BeginReadByGameThread);
+			bool result = CanSubmitDataFromApplicationThread.Signal();
+		}
+
+		BeginSubmittedByRenderThread->up = false;
+		BeginSubmittedByRenderThread->down = false;
+		BeginSubmittedByRenderThread->right = false;
+		BeginSubmittedByRenderThread->left = false;
 
 		// clear window
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		// Use graphic pipeline
+
+		glfwPollEvents();
 		
 		glUseProgram(program);
 
-		//if (mtx.try_lock())
 		{
 			glm::mat4 modelmatrix = teapot.mesh->model_pos_mat;
 			glm::mat4 mvp = camera.perspective * camera.view * teapot.mesh->model_pos_mat;
 			glm::mat3 modelinversetranspose = teapot.mesh->model_vec_mat;
 			glm::vec3 camerapos = camera.pos;
-			//mtx.unlock();
 
 			// Lighting data
 			glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);

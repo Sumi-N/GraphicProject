@@ -63,6 +63,9 @@
     <ClInclude Include="Event.h">
       <Filter>Header Files\Share</Filter>
     </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header Files\GraphicsThread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="point.frag.glsl">
@@ -95,6 +98,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

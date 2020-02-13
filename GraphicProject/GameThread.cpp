@@ -8,17 +8,11 @@
 #include "Object.h"
 #include "Camera.h"
 #include "FileLoader.h"
+#include "main.h"
 
 extern Object teapot;
 extern Camera camera;
-
-struct DataRequiredForBuffer
-{
-	std::vector<Camera> camera;
-	std::vector<Mesh> meshlist;
-	std::vector<Texture> textureList;
-	std::vector<Material> materialList;
-};
+extern DataRequiredForGameThread * BeginReadByGameThread;
 
 	GameThread::GameThread()
 	{
@@ -42,6 +36,42 @@ struct DataRequiredForBuffer
 			teapot.mesh->Update();
 			camera.Update(timer.time.dt);
 
+			if (BeginReadByGameThread->up)
+			{
+				camera.MoveCamera(0.01f, camera.forwardvec);
+				//camera.Translate(camera.pos + 0.5f * camera.forwardvec);
+			}
+
+			if (BeginReadByGameThread->down)
+			{
+				camera.MoveCamera(-0.01f, camera.forwardvec);
+				//camera.Translate(camera.pos - 0.5f * camera.forwardvec);
+			}
+
+			if (BeginReadByGameThread->left)
+			{
+				camera.MoveCamera(-0.01f, camera.rightvec);
+				//camera.Translate(camera.pos - 0.5f * camera.rightvec);
+			}
+
+			if (BeginReadByGameThread->right)
+			{
+				camera.MoveCamera(0.01f, camera.rightvec);
+				//camera.Translate(camera.pos + 0.5f * camera.rightvec);
+			}
+
+			// Check if render thread is ready to get date from game thread
+			bool canSubmitDataToRenderThread;
+			do
+			{
+				canSubmitDataToRenderThread = WaitUntilDataCanSubmitFromApplicationThread(250);
+			} while (!canSubmitDataToRenderThread);
+
+			{
+				// Submit data in this scope
+			}
+
+			SignalTheDataHasBeenSubmitted();
 		}
 	}
 
