@@ -25,7 +25,7 @@ void ConstantBuffer::Bind()
 
 	if (type == ConstantBufferTypes::Frame)
 	{
-		size = sizeof(glm::mat4) + sizeof(glm::mat3);
+		size = sizeof(glm::mat4) + sizeof(glm::mat3) + sizeof(float);
 		//size = 100;
 	}
 
@@ -33,6 +33,12 @@ void ConstantBuffer::Bind()
 	{
 		size = 2 * sizeof(glm::mat4) + sizeof(glm::mat3);
 		//size = 146;
+	}
+
+	if (type == ConstantBufferTypes::Material)
+	{
+		size = sizeof(glm::vec4) + sizeof(glm::vec4);
+		//size = 32;
 	}
 
 	glBufferData(GL_UNIFORM_BUFFER, static_cast<GLsizeiptr>(size), nullptr, GL_DYNAMIC_DRAW);

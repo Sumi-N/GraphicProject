@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <vector>
 #include "cyCodeBase/cyColor.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 class Material
 {
@@ -11,6 +12,9 @@ public:
 	float Kd[3];  //!< Diffuse  color
 	float Ks[3];  //!< Specular color
 	float Ns;     //!< Specular exponent
+
+	glm::vec3 diffuse;
+	glm::vec4 specular;
 
 	// Functions for openGL
 public:

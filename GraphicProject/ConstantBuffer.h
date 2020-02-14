@@ -10,23 +10,34 @@ namespace ConstantBufferFormat
 		glm::mat4 cvp;
 		// camera world position
 		glm::vec3 cwp;
+
+		float padding;
 	};
 
 	struct DrawCall
 	{
 		// model world transformation
 		glm::mat4 mwt;
-		// model camera perspective
+		// model view perspective
 		glm::mat4 mvp;
 		// model inverse transpose 
 		glm::mat3 mit;
 	};
+
+	struct Material
+	{
+		glm::vec4 diffuse;
+		glm::vec4 specular;
+	};
+
+
 }
 
 enum class ConstantBufferTypes : uint8_t
 {
 	Frame = 0,
 	DrawCall = 1,
+	Material = 2,
 };
 
 class ConstantBuffer

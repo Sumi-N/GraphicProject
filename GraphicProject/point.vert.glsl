@@ -3,15 +3,11 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 TexCoord;
 
-//uniform mat4 mvp;
-// uniform mat4 modelmatrix;
-// uniform mat3 mtranspose;
-// uniform vec3 cameraposition;
-
 layout (std140, binding = 0) uniform constant_frame
 {
 	mat4 cvp;
 	vec3 cwp;
+	float padding;
 };
 
 layout (std140, binding = 1) uniform const_drawcall
@@ -20,7 +16,6 @@ layout (std140, binding = 1) uniform const_drawcall
 	mat4 mvp;
 	mat3 mit;
 };
-
 
 uniform vec3 ambientintensity;
 uniform vec3 pointintensity;
@@ -33,6 +28,8 @@ out vec3 pointlightintensityout;
 out vec3 seeangle;
 
 out vec2 TexCoord0;
+out vec3 diffuse;
+out vec4 specular;
 
 void main()
 {

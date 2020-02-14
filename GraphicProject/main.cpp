@@ -20,11 +20,13 @@ struct DataRequiredForBuffer
 {
 	ConstantBufferFormat::Frame frame;
 	std::vector<ConstantBufferFormat::DrawCall> drawcalllist;
+	std::vector<ConstantBufferFormat::Material> materiallist;
 	std::vector<Object *> objectlist;
 };
 
 ConstantBuffer const_buffer_frame(ConstantBufferTypes::Frame);
 ConstantBuffer const_buffer_drawcall(ConstantBufferTypes::DrawCall);
+ConstantBuffer const_buffer_material(ConstantBufferTypes::Material);
 
 DataRequiredForBuffer dataRequiredForBuffer[2];
 DataRequiredForBuffer * BeginSubmittedByGameThread = &dataRequiredForBuffer[0];
@@ -50,10 +52,16 @@ void SignalTheDataHasBeenSubmitted()
 void SubmitObjectData(Object * obj)
 {
 	BeginSubmittedByGameThread->objectlist.push_back(obj);
+
 	ConstantBufferFormat::DrawCall drawcall;
 	drawcall.mit = obj->mesh->model_vec_mat;
 	drawcall.mwt = obj->mesh->model_pos_mat;
 	BeginSubmittedByGameThread->drawcalllist.push_back(drawcall);
+
+	ConstantBufferFormat::Material material;
+	material.specular = glm::vec4(obj->mesh->material->specular);
+	material.diffuse = glm::vec4(obj->mesh->material->Kd[0], obj->mesh->material->Kd[1], obj->mesh->material->Kd[2], 1.0);
+	BeginSubmittedByGameThread->materiallist.push_back(material);
 }
 
 void SubmitCameraData(Camera * camera)
@@ -158,6 +166,7 @@ int Initialize()
 	// Bind Uniform buffer
 	const_buffer_drawcall.Bind();
 	const_buffer_frame.Bind();
+	const_buffer_material.Bind();
 
 	InitializeObject();
 }
@@ -202,46 +211,10 @@ int main()
 
 	program = teapot.mesh->material->programid;
 
-	//GLint mvplocation = glGetUniformLocation(program, "mvp");
-	//if (mvplocation == -1)
-	//{
-	//	std::cerr << "The mvplocation variable doesn't exist in the shader file" << std::endl;
-	//}
-
-	//GLint modelmatrixlocation = glGetUniformLocation(program, "modelmatrix");
-	//if (modelmatrixlocation == -1)
-	//{
-	//	std::cerr << "The modelmatrix variable doesn't exist in the shader file" << std::endl;
-	//}
-
-	//GLint cameraposition = glGetUniformLocation(program, "cameraposition");
-	//if (cameraposition == -1)
-	//{
-	//	std::cerr << "The cameraposition variable doesn't exist in the shader file" << std::endl;
-	//}
-
-	//GLint mtransposelocation = glGetUniformLocation(program, "mtranspose");
-	//if (mtransposelocation == -1)
-	//{
-	//	std::cerr << "The mtransposelocation variable doesn't exist in the shader file" << std::endl;
-	//}
-
 	GLint ambientintensity = glGetUniformLocation(program, "ambientintensity");
 	if (ambientintensity == -1)
 	{
 		std::cerr << "The ambientintensity variable doesn't exist in the shader file" << std::endl;
-	}
-
-	GLint diffuselocation = glGetUniformLocation(program, "diffuse");
-	if (diffuselocation == -1)
-	{
-		std::cerr << "The diffuselocation variable doesn't exist in the shader file" << std::endl;
-	}
-
-	GLint specularlocation = glGetUniformLocation(program, "specular");
-	if (specularlocation == -1)
-	{
-		std::cerr << "The specularlocation variable doesn't exist in the shader file" << std::endl;
 	}
 
 	GLint pointintensitylocation = glGetUniformLocation(program, "pointintensity");
@@ -293,8 +266,8 @@ int main()
 			auto & const_data_frame = BeginRenderedByRenderThread->frame;
 			const_buffer_frame.Update(&const_data_frame);
 
-			glUniform3f(diffuselocation, teapot.mesh->material->Kd[0], teapot.mesh->material->Kd[1], teapot.mesh->material->Kd[2]);
-			glUniform4f(specularlocation, teapot.mesh->material->Ks[0], teapot.mesh->material->Ks[1], teapot.mesh->material->Ks[2], teapot.mesh->material->Ns);
+			//glUniform3f(diffuselocation, teapot.mesh->material->Kd[0], teapot.mesh->material->Kd[1], teapot.mesh->material->Kd[2]);
+			//glUniform4f(specularlocation, teapot.mesh->material->Ks[0], teapot.mesh->material->Ks[1], teapot.mesh->material->Ks[2], teapot.mesh->material->Ns);
 			glUniform1i(gSampler, 0);
 			glUniform1i(gSampler2, 1);
 
@@ -308,6 +281,10 @@ int main()
 				auto & const_data_draw = BeginRenderedByRenderThread->drawcalllist[i];
 				const_data_draw.mvp =  const_data_frame.cvp * const_data_draw.mwt;
 				const_buffer_drawcall.Update(&const_data_draw);
+
+				auto & const_data_material = BeginRenderedByRenderThread->materiallist[i];
+				const_buffer_material.Update(&const_data_material);
+
 				BeginRenderedByRenderThread->objectlist[i]->mesh->material->BindShader();
 				BeginRenderedByRenderThread->objectlist[i]->mesh->Draw();
 			}
@@ -317,6 +294,7 @@ int main()
 
 			BeginRenderedByRenderThread->objectlist.clear();
 			BeginRenderedByRenderThread->drawcalllist.clear();
+			BeginRenderedByRenderThread->materiallist.clear();
 		}
 	}
 }
