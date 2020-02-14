@@ -30,6 +30,12 @@ namespace ConstantBufferFormat
 		glm::vec4 specular;
 	};
 
+	struct Light
+	{
+		glm::vec4 ambientintensity;
+		glm::vec4 pointintensity;
+		glm::vec4 pointposition;
+	};
 
 }
 
@@ -38,6 +44,7 @@ enum class ConstantBufferTypes : uint8_t
 	Frame = 0,
 	DrawCall = 1,
 	Material = 2,
+	Light = 3,
 };
 
 class ConstantBuffer

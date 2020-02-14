@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ConstantBuffer.h"
+#include <stdio.h>
 
 
 
@@ -28,17 +29,23 @@ void ConstantBuffer::Bind()
 		size = sizeof(glm::mat4) + sizeof(glm::mat3) + sizeof(float);
 		//size = 100;
 	}
-
-	if (type == ConstantBufferTypes::DrawCall)
+	else if (type == ConstantBufferTypes::DrawCall)
 	{
 		size = 2 * sizeof(glm::mat4) + sizeof(glm::mat3);
 		//size = 146;
 	}
-
-	if (type == ConstantBufferTypes::Material)
+	else if (type == ConstantBufferTypes::Material)
 	{
 		size = sizeof(glm::vec4) + sizeof(glm::vec4);
 		//size = 32;
+	}
+	else if (type == ConstantBufferTypes::Light)
+	{
+		size = 3 * sizeof(glm::vec4);
+	}
+	else
+	{
+		printf("You don't have such frame buffer type");
 	}
 
 	glBufferData(GL_UNIFORM_BUFFER, static_cast<GLsizeiptr>(size), nullptr, GL_DYNAMIC_DRAW);

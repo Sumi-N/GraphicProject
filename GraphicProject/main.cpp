@@ -16,9 +16,24 @@
 #include "Event.h"
 #include "ConstantBuffer.h"
 
+// About threading
+#include <thread>
+#include <mutex>
+#include "GameThread.h"
+#include "Input.h"
+
+//////////////////////Global Data
+GLFWwindow * window;
+Camera camera;
+Object teapot;
+AmbientLight ambientlight;
+PointLight pointlight;
+GLuint program;
+
 struct DataRequiredForBuffer
 {
 	ConstantBufferFormat::Frame frame;
+	ConstantBufferFormat::Light light;
 	std::vector<ConstantBufferFormat::DrawCall> drawcalllist;
 	std::vector<ConstantBufferFormat::Material> materiallist;
 	std::vector<Object *> objectlist;
@@ -27,6 +42,7 @@ struct DataRequiredForBuffer
 ConstantBuffer const_buffer_frame(ConstantBufferTypes::Frame);
 ConstantBuffer const_buffer_drawcall(ConstantBufferTypes::DrawCall);
 ConstantBuffer const_buffer_material(ConstantBufferTypes::Material);
+ConstantBuffer const_buffer_light(ConstantBufferTypes::Light);
 
 DataRequiredForBuffer dataRequiredForBuffer[2];
 DataRequiredForBuffer * BeginSubmittedByGameThread = &dataRequiredForBuffer[0];
@@ -70,19 +86,12 @@ void SubmitCameraData(Camera * camera)
 	BeginSubmittedByGameThread->frame.cvp = camera->view_perspective_mat;
 }
 
-// About threading
-#include <thread>
-#include <mutex>
-#include "GameThread.h"
-#include "Input.h"
-
-//////////////////////Global Data
-GLFWwindow * window;
-Camera camera;
-Object teapot;
-AmbientLight ambientlight;
-PointLight pointlight;
-GLuint program;
+void SubmitLightingData()
+{
+	BeginSubmittedByGameThread->light.ambientintensity = glm::vec4(ambientlight.intensity, 1.0);
+	BeginSubmittedByGameThread->light.pointintensity = glm::vec4(pointlight.intensity, 1.0);
+	BeginSubmittedByGameThread->light.pointposition = glm::vec4(pointlight.position, 1.0);
+}
 
 void InitializeObject()
 {
@@ -103,6 +112,11 @@ void InitializeObject()
 	teapot.pos = glm::vec3(0, 0, -50);
 	teapot.scale = glm::vec3(1.0, 1.0, 1.0);
 	teapot.rot = glm::vec3(-90, 0, 0);
+
+	// Setup Light
+	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
+	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
+	pointlight.position = glm::vec3(20, 20, -50);
 }
 
 int Initialize()
@@ -167,6 +181,7 @@ int Initialize()
 	const_buffer_drawcall.Bind();
 	const_buffer_frame.Bind();
 	const_buffer_material.Bind();
+	const_buffer_light.Bind();
 
 	InitializeObject();
 }
@@ -176,11 +191,6 @@ int main()
 	Initialize();
 
 	std::thread gamethread(Application::Init);
-
-	// Setup Light
-	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
-	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
-	pointlight.position = glm::vec3(20, 20, -50);
 
 	Texture * pottexturespecular = new Texture;
 	pottexturespecular->Load("../Objfiles/brick-specular.png");
@@ -210,24 +220,6 @@ int main()
 	glBindTexture(GL_TEXTURE_2D, TextureObj);
 
 	program = teapot.mesh->material->programid;
-
-	GLint ambientintensity = glGetUniformLocation(program, "ambientintensity");
-	if (ambientintensity == -1)
-	{
-		std::cerr << "The ambientintensity variable doesn't exist in the shader file" << std::endl;
-	}
-
-	GLint pointintensitylocation = glGetUniformLocation(program, "pointintensity");
-	if (pointintensitylocation == -1)
-	{
-		std::cerr << "The pointintensitylocation variable doesn't exist in the shader file" << std::endl;
-	}
-
-	GLint pointpositionlocation = glGetUniformLocation(program, "pointposition");
-	if (pointpositionlocation == -1)
-	{
-		std::cerr << "The pointpositionlocation variable doesn't exist in the shader file" << std::endl;
-	}
 
 	GLint gSampler = glGetUniformLocation(program, "gSampler");
 	if (gSampler == -1)
@@ -263,18 +255,16 @@ int main()
 		
 
 		{
+			// Submit Camera Information
 			auto & const_data_frame = BeginRenderedByRenderThread->frame;
 			const_buffer_frame.Update(&const_data_frame);
 
-			//glUniform3f(diffuselocation, teapot.mesh->material->Kd[0], teapot.mesh->material->Kd[1], teapot.mesh->material->Kd[2]);
-			//glUniform4f(specularlocation, teapot.mesh->material->Ks[0], teapot.mesh->material->Ks[1], teapot.mesh->material->Ks[2], teapot.mesh->material->Ns);
+			// Submit Light Information
+			auto & const_data_light = BeginRenderedByRenderThread->light;
+			const_buffer_light.Update(&const_data_light);
+
 			glUniform1i(gSampler, 0);
 			glUniform1i(gSampler2, 1);
-
-			// Lighting data
-			glUniform3f(ambientintensity, ambientlight.intensity.x, ambientlight.intensity.y, ambientlight.intensity.z);
-			glUniform3f(pointintensitylocation, pointlight.intensity.r, pointlight.intensity.g, pointlight.intensity.b);
-			glUniform3f(pointpositionlocation, pointlight.position.x, pointlight.position.y, pointlight.position.z);
 
 			for (int i = 0; i < BeginRenderedByRenderThread->objectlist.size(); i++)
 			{
@@ -289,7 +279,6 @@ int main()
 				BeginRenderedByRenderThread->objectlist[i]->mesh->Draw();
 			}
 			
-
 			glfwSwapBuffers(window);
 
 			BeginRenderedByRenderThread->objectlist.clear();

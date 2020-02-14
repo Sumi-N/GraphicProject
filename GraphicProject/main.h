@@ -8,6 +8,7 @@ void SignalTheDataHasBeenSubmitted();
 
 void SubmitObjectData(Object * obj);
 void SubmitCameraData(Camera * camera);
+void SubmitLightingData();
 
 struct DataRequiredForGameThread
 {

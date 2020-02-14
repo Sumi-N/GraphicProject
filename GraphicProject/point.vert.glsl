@@ -17,28 +17,25 @@ layout (std140, binding = 1) uniform const_drawcall
 	mat3 mit;
 };
 
-uniform vec3 ambientintensity;
-uniform vec3 pointintensity;
-uniform vec3 pointposition;
+layout (std140, binding = 3) uniform const_light
+{
+	vec4 ambientintensity;
+	vec4 pointintensity;
+	vec4 pointposition;
+};
 
 out vec3 normalvetor;
-out vec3 ambientintensityout;
 out vec3 pointlightdirectioncout;
-out vec3 pointlightintensityout;
 out vec3 seeangle;
 
 out vec2 TexCoord0;
-out vec3 diffuse;
-out vec4 specular;
 
 void main()
 {
 	gl_Position = mvp * vec4(position, 1);
 	normalvetor = normalize(mit * normal);
-	ambientintensityout = ambientintensity;
 	seeangle = normalize(cwp -  vec3(mwt * vec4(position,1)));
-	pointlightdirectioncout = normalize(pointposition - vec3(mwt * vec4(position,1)));
-	pointlightintensityout = pointintensity;
+	pointlightdirectioncout = normalize(vec3(pointposition) - vec3(mwt * vec4(position,1)));
 
 	TexCoord0 = TexCoord;
 }
