@@ -13,7 +13,7 @@ bool WaitForEvent(const Event & i_event, const double i_timetowait)
 		case WAIT_TIMEOUT:
 			return false;
 		default:
-			printf("something went wront with wait for event function");
+			printf("something went wrong with wait for event function");
 			return false;
 		}
 	}

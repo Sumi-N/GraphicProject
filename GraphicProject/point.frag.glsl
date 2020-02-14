@@ -1,14 +1,6 @@
 #version 420 core
 
-out vec4 fragment;
-
-in vec3 normalvetor;
-in vec3 pointlightdirectioncout;
-in vec3 seeangle;
-in vec2 TexCoord0;
-
-uniform sampler2D texture0;
-uniform sampler2D texture1;
+out vec4 color;
 
 layout (std140, binding = 2) uniform const_material
 {
@@ -18,24 +10,39 @@ layout (std140, binding = 2) uniform const_material
 
 layout (std140, binding = 3) uniform const_light
 {
-	vec4 ambientintensity;
-	vec4 pointintensity;
-	vec4 pointposition;
+	vec4 light_ambient_intensity;
+	vec4 light_point_intensity;
+	vec4 light_point_position;
 };
+
+uniform sampler2D texture0;
+uniform sampler2D texture1;
+
+// Normal vector of the object at world coordinate
+in vec3 world_normal;
+// Point light direction vector at world coordinate
+in vec3 world_pointlight_direction;
+// Object direction vector at world coordinate
+in vec3 world_object_direction;
+// Texture coordinate
+in vec2 texcoord;
 
 void main()
 {
-	fragment = texture2D(texture0, TexCoord0.st) * ambientintensity * diffuse;
-	float costheta = dot(normalvetor, pointlightdirectioncout);
+	// Ambient light
+	color = texture2D(texture0, texcoord.st) * diffuse * light_ambient_intensity;
+
+	float cos_theta_1 = dot(world_normal, world_pointlight_direction);
 	
-	if (costheta > 0)
+	if (cos_theta_1 > 0)
 	{
-		fragment += costheta * texture2D(texture0, TexCoord0.st) * diffuse * pointintensity;
+		color += texture2D(texture0, texcoord.st) * cos_theta_1 * diffuse * light_point_intensity;
 	
-		vec3 h = normalize(seeangle + pointlightdirectioncout);
-		if (dot(h, normalvetor) > 0)
+		vec3 h = normalize(world_object_direction + world_pointlight_direction);
+
+		if (dot(h, world_normal) > 0)
 		{
-			fragment +=  texture2D(texture1, TexCoord0.st) * vec4(vec3(pointintensity) * vec3(specular) * pow(dot(h, normalvetor), specular.w), 1.0);
+			color +=  texture2D(texture1, texcoord.st) * vec4(vec3(light_point_intensity) * vec3(specular) * pow(dot(h, world_normal), specular.w), 1.0);
 		}
 	}
 }

@@ -1,40 +1,49 @@
 #version 420 core
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 TexCoord;
+
+layout (location = 0) in vec3 model_position;
+layout (location = 1) in vec3 model_normal;
+layout (location = 2) in vec2 model_texcoord;
 
 layout (std140, binding = 0) uniform constant_frame
 {
-	mat4 cvp;
-	vec3 cwp;
+	mat4 view_perspective_matrix;
+	vec3 camera_position_vector;
 	float padding;
 };
 
 layout (std140, binding = 1) uniform const_drawcall
 {
-	mat4 mwt;
-	mat4 mvp;
-	mat3 mit;
+	mat4 model_position_matrix;
+	mat4 model_view_perspective_matrix;
+	mat3 model_inverse_transpose_matrix;
 };
 
 layout (std140, binding = 3) uniform const_light
 {
-	vec4 ambientintensity;
-	vec4 pointintensity;
-	vec4 pointposition;
+	vec4 light_ambient_intensity;
+	vec4 light_point_intensity;
+	vec4 light_point_position;
 };
 
-out vec3 normalvetor;
-out vec3 pointlightdirectioncout;
-out vec3 seeangle;
-out vec2 TexCoord0;
+// Normal vector of the object at world coordinate
+out vec3 world_normal;
+// Point light direction vector at world coordinate
+out vec3 world_pointlight_direction;
+// Object direction vector at world coordinate
+out vec3 world_object_direction;
+// Texture coordinate
+out vec2 texcoord;
 
 void main()
 {
-	gl_Position = mvp * vec4(position, 1);
-	normalvetor = normalize(mit * normal);
-	seeangle = normalize(cwp -  vec3(mwt * vec4(position,1)));
-	pointlightdirectioncout = normalize(vec3(pointposition) - vec3(mwt * vec4(position,1)));
+	// Send position data at perspective coordinate
+	gl_Position                = model_view_perspective_matrix * vec4(model_position, 1);
+	// Get normal vector at world coordinate
+	world_normal               = normalize(model_inverse_transpose_matrix * model_normal);
 
-	TexCoord0 = TexCoord;
+	world_pointlight_direction = normalize(vec3(light_point_position) - vec3(model_position_matrix * vec4(model_position, 1)));
+
+	world_object_direction     = normalize(camera_position_vector -  vec3(model_position_matrix * vec4(model_position, 1)));
+
+	texcoord                   = model_texcoord;
 }

@@ -57,9 +57,10 @@ void Material::Load(const char * vert, const char * frag)
 	}
 
 	// Link the program
-	glBindAttribLocation(programid, 0, "position");
-	glBindAttribLocation(programid, 1, "color");
-	glBindFragDataLocation(programid, 0, "fragment");
+	glBindAttribLocation(programid, 0, "model_position");
+	glBindAttribLocation(programid, 1, "model_normal");
+	glBindAttribLocation(programid, 2, "model_texcoord");
+	glBindFragDataLocation(programid, 0, "color");
 	glLinkProgram(programid);
 
 	if (Utility::printProgramInfoLog(programid))
