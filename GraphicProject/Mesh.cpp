@@ -65,8 +65,6 @@ void Mesh::SetMaterial(Material * material)
 			material->Kd[i] = tmpdata.M(0).Kd[i];
 			material->Ks[i] = tmpdata.M(0).Ks[i];
 		}
-		material->diffuse = glm::vec3(tmpdata.M(0).Kd[0], tmpdata.M(0).Kd[1], tmpdata.M(0).Kd[2]);
-		material->specular = glm::vec4(tmpdata.M(0).Ks[0], tmpdata.M(0).Ks[1], tmpdata.M(0).Ks[2], tmpdata.M(0).Ns);
 	}
 }
 

@@ -69,9 +69,25 @@ void Material::Load(const char * vert, const char * frag)
 	//glDeleteProgram(programid);
 }
 
+void Material::LoadTexture(const char * filename)
+{
+	Texture texture;
+	texture.Load(filename);
+	int unitnumber = texturelist.size();
+	texture.Init(unitnumber, programid);
+	texturelist.push_back(texture);
+}
+
 void Material::BindShader()
 {
 	glUseProgram(programid);
+	if (texturelist.size() != 0)
+	{
+		for (int i = 0; i < texturelist.size(); i++)
+		{
+			texturelist[i].BindUniformData();
+		}
+	}
 }
 
 bool Material::ReadShaderSource(const char* filename, std::vector<GLchar> &buffer)
@@ -147,4 +163,33 @@ bool Texture::Load(char const * filename)
 	}
 
 	return success;
+}
+
+void Texture::Init(int unitnum, GLint programid)
+{
+	unitnumber = unitnum;
+
+	GLuint textureobj;
+	glGenTextures(1, &textureobj);
+	glActiveTexture(GL_TEXTURE0 + unitnum);
+	glBindTexture(GL_TEXTURE_2D, textureobj);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textureobj);
+
+	uniformname = "texture" + std::to_string(unitnum);
+	uniformid = glGetUniformLocation(programid, uniformname.c_str());
+	if (uniformid == -1)
+	{
+		std::cerr << "The texture variable doesn't exist in the shader file" << std::endl;
+	}
+}
+
+void Texture::BindUniformData()
+{
+	glUniform1i(uniformid, unitnumber);
 }

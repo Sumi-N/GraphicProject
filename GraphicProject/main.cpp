@@ -18,7 +18,6 @@
 
 // About threading
 #include <thread>
-#include <mutex>
 #include "GameThread.h"
 #include "Input.h"
 
@@ -75,7 +74,7 @@ void SubmitObjectData(Object * obj)
 	BeginSubmittedByGameThread->drawcalllist.push_back(drawcall);
 
 	ConstantBufferFormat::Material material;
-	material.specular = glm::vec4(obj->mesh->material->specular);
+	material.specular = glm::vec4(obj->mesh->material->Ks[0], obj->mesh->material->Ks[1], obj->mesh->material->Ks[2], obj->mesh->material->Ns);
 	material.diffuse = glm::vec4(obj->mesh->material->Kd[0], obj->mesh->material->Kd[1], obj->mesh->material->Kd[2], 1.0);
 	BeginSubmittedByGameThread->materiallist.push_back(material);
 }
@@ -105,8 +104,8 @@ void InitializeObject()
 	teapot.SetMesh(mesh);
 	mesh->SetMaterial(material);
 
-	teapot.mesh->texture = new Texture();
-	teapot.mesh->texture->Load("../Objfiles/brick.png");
+	teapot.mesh->material->LoadTexture("../Objfiles/brick.png");
+	teapot.mesh->material->LoadTexture("../Objfiles/brick-specular.png");
 
 	// Setting up position 
 	teapot.pos = glm::vec3(0, 0, -50);
@@ -119,7 +118,7 @@ void InitializeObject()
 	pointlight.position = glm::vec3(20, 20, -50);
 }
 
-int Initialize()
+int InitializeRenderThread()
 {
 	// Initialize GLFW
 	if (glfwInit() == GL_FALSE)
@@ -174,64 +173,24 @@ int Initialize()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	FinishSubmittingAllDataFromGameThread.Initialize(EventType::ResetAutomatically);
-	CanSubmitDataFromApplicationThread.Initialize(EventType::ResetAutomatically, EventState::Signaled);
-
 	// Bind Uniform buffer
 	const_buffer_drawcall.Bind();
 	const_buffer_frame.Bind();
 	const_buffer_material.Bind();
 	const_buffer_light.Bind();
-
-	InitializeObject();
 }
 
 int main()
 {
-	Initialize();
+	InitializeRenderThread();
 
+	InitializeObject();
+
+	// Setup thread
+	FinishSubmittingAllDataFromGameThread.Initialize(EventType::ResetAutomatically);
+	CanSubmitDataFromApplicationThread.Initialize(EventType::ResetAutomatically, EventState::Signaled);
 	std::thread gamethread(Application::Init);
 
-	Texture * pottexturespecular = new Texture;
-	pottexturespecular->Load("../Objfiles/brick-specular.png");
-
-	GLuint TextureObj;
-	glGenTextures(1, &TextureObj);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, TextureObj);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, teapot.mesh->texture->width, teapot.mesh->texture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, teapot.mesh->texture->data.data());
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, TextureObj);
-
-	GLuint TextureObj2;
-	glGenTextures(1, &TextureObj2);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, TextureObj);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, pottexturespecular->width, pottexturespecular->height, 0, GL_RGB, GL_UNSIGNED_BYTE, pottexturespecular->data.data());
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, TextureObj);
-
-	program = teapot.mesh->material->programid;
-
-	GLint gSampler = glGetUniformLocation(program, "gSampler");
-	if (gSampler == -1)
-	{
-		std::cerr << "The gSampler variable doesn't exist in the shader file" << std::endl;
-	}
-
-	GLint gSampler2 = glGetUniformLocation(program, "gSampler2");
-	if (gSampler2 == -1)
-	{
-		std::cerr << "The gSampler2 variable doesn't exist in the shader file" << std::endl;
-	}
 
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
@@ -253,7 +212,7 @@ int main()
 
 		glfwPollEvents();
 		
-
+		// Renderring part
 		{
 			// Submit Camera Information
 			auto & const_data_frame = BeginRenderedByRenderThread->frame;
@@ -262,9 +221,6 @@ int main()
 			// Submit Light Information
 			auto & const_data_light = BeginRenderedByRenderThread->light;
 			const_buffer_light.Update(&const_data_light);
-
-			glUniform1i(gSampler, 0);
-			glUniform1i(gSampler2, 1);
 
 			for (int i = 0; i < BeginRenderedByRenderThread->objectlist.size(); i++)
 			{
@@ -275,15 +231,17 @@ int main()
 				auto & const_data_material = BeginRenderedByRenderThread->materiallist[i];
 				const_buffer_material.Update(&const_data_material);
 
+				// Submit shader program and get texture unifrom
 				BeginRenderedByRenderThread->objectlist[i]->mesh->material->BindShader();
 				BeginRenderedByRenderThread->objectlist[i]->mesh->Draw();
 			}
-			
-			glfwSwapBuffers(window);
-
-			BeginRenderedByRenderThread->objectlist.clear();
-			BeginRenderedByRenderThread->drawcalllist.clear();
-			BeginRenderedByRenderThread->materiallist.clear();
 		}
+
+		glfwSwapBuffers(window);
+
+		// Clean up
+		BeginRenderedByRenderThread->objectlist.clear();
+		BeginRenderedByRenderThread->drawcalllist.clear();
+		BeginRenderedByRenderThread->materiallist.clear();
 	}
 }

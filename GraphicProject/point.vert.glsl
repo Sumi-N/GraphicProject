@@ -27,7 +27,6 @@ layout (std140, binding = 3) uniform const_light
 out vec3 normalvetor;
 out vec3 pointlightdirectioncout;
 out vec3 seeangle;
-
 out vec2 TexCoord0;
 
 void main()
