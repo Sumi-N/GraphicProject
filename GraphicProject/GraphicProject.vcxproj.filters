@@ -67,14 +67,23 @@
       <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
     <ClInclude Include="ConstantBuffer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\GraphicsThread</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTexture.h">
+      <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="point.frag.glsl">
+    <None Include="blinn_phong.frag.glsl">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="point.vert.glsl">
+    <None Include="blinn_phong.vert.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="quad.frag.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="quad.vert.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
@@ -104,6 +113,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConstantBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
