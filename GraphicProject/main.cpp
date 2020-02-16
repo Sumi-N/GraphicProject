@@ -31,6 +31,7 @@ GLuint program;
 
 // Render texture
 GLuint renderedtexture;
+GLuint texture_depth;
 GLuint framebufferid;
 Mesh * quad;
 Material* material2;
@@ -123,7 +124,8 @@ void InitializeObject()
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
 	pointlight.position = glm::vec3(20, 20, -50);
 
-	// Create quad
+	/////////////////////////
+    // Create quad
 	quad = new Mesh();
 	quad->data.resize(6);
 	quad->index.resize(2);
@@ -134,12 +136,12 @@ void InitializeObject()
 	quad->data[4].vertex = cy::Point3f(1.0, -1.0, 0.0);
 	quad->data[5].vertex = cy::Point3f(1.0, 1.0, 0.0);
 
-	quad->data[0].uv= cy::Point2f(0.0, 0.0);
-	quad->data[1].uv= cy::Point2f(1.0, 0.0);
-	quad->data[2].uv= cy::Point2f(0.0, 1.0);
-	quad->data[3].uv= cy::Point2f(0.0, 1.0);
-	quad->data[4].uv= cy::Point2f(1.0, 0.0);
-	quad->data[5].uv= cy::Point2f(1.0, 1.0);
+	quad->data[0].uv = cy::Point2f(0.0, 0.0);
+	quad->data[1].uv = cy::Point2f(1.0, 0.0);
+	quad->data[2].uv = cy::Point2f(0.0, 1.0);
+	quad->data[3].uv = cy::Point2f(0.0, 1.0);
+	quad->data[4].uv = cy::Point2f(1.0, 0.0);
+	quad->data[5].uv = cy::Point2f(1.0, 1.0);
 
 	quad->index[0].v[0] = 0;
 	quad->index[0].v[1] = 1;
@@ -153,6 +155,7 @@ void InitializeObject()
 	material2 = new Material();
 	material2->Load("quad.vert.glsl", "quad.frag.glsl");
 
+	////////////////////////////
 }
 
 int InitializeRenderThread()
@@ -220,29 +223,37 @@ int InitializeRenderThread()
 	// Create frame buffer
 	glGenFramebuffers(1, &framebufferid);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebufferid);
+
+	// Create empty textures
 	glGenTextures(1, &renderedtexture);
-
-	// Create empty texture
 	glBindTexture(GL_TEXTURE_2D, renderedtexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
-	// Depth buffer for texture
-	GLuint depthrenderbuffer;
-	glGenRenderbuffers(1, &depthrenderbuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, WIDTH, HEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+	// Create empty texture for depth
+	glGenTextures(1, &texture_depth);
+	glBindTexture(GL_TEXTURE_2D, texture_depth);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, WIDTH, HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 
 	// bind texture to framebuffer
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedtexture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + 0, renderedtexture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_depth, 0);//optional
+
 	GLenum drawbuffers[1] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, drawbuffers);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{  //Check for FBO completeness
 		std::cout << "Error! FrameBuffer is not complete" << std::endl;
+		std::cin.get();
+		std::terminate();
 	}
 
 	// Set back to original back buffer
@@ -276,15 +287,15 @@ int main()
 		BeginSubmittedByRenderThread->right = false;
 		BeginSubmittedByRenderThread->left = false;
 
-		// Clear window
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		glfwPollEvents();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, renderedtexture);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebufferid);
 		{
 			// Renderring part
 			{
+				// Clear window
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 				// Submit Camera Information
 				auto & const_data_frame = BeginRenderedByRenderThread->frame;
 				const_buffer_frame.Update(&const_data_frame);
@@ -308,18 +319,17 @@ int main()
 				}
 			}
 		}
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//{
-		//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		{
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//	glUseProgram(material2->programid);
-		//	glActiveTexture(GL_TEXTURE0 + 1);
-		//	//use texture from our FBO generated in PASS 1     
-		//	glBindTexture(GL_TEXTURE_2D, renderedtexture);
-		//	glUniform1i(glGetUniformLocation(material2->programid, "texture0"), 1);
+			glUseProgram(material2->programid);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, renderedtexture);
+			glUniform1i(glGetUniformLocation(material2->programid, "texture0"), 0);
 
-		//	quad->Draw();
-		//}
+			quad->Draw();
+		}
 
 
 		glfwSwapBuffers(window);

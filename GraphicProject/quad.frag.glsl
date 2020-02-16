@@ -8,6 +8,6 @@ in vec2 texcoord;
 
 void main()
 {
-	color = texture2D(texture0, texcoord.st);
+	color = texture(texture0, texcoord.st);
 	//color = vec4(1.0, 0.0, 1.0, 0.0);
 }

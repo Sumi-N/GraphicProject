@@ -85,6 +85,7 @@ void Mesh::Update()
 
 void Mesh::Draw()
 {
+	glBindVertexArray(bufferdata.vertexarrayid);
 	glDrawElements(GL_TRIANGLES, index.size() * sizeof(index[0]), GL_UNSIGNED_INT, (void*)0);
 }
 

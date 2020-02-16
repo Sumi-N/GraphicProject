@@ -170,7 +170,6 @@ void Texture::Init(int unitnum, GLint programid)
 {
 	unitnumber = unitnum;
 
-	GLuint textureobj;
 	glGenTextures(1, &textureobj);
 	glActiveTexture(GL_TEXTURE0 + unitnum);
 	glBindTexture(GL_TEXTURE_2D, textureobj);
@@ -180,7 +179,6 @@ void Texture::Init(int unitnum, GLint programid)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, textureobj);
 
 	uniformname = "texture" + std::to_string(unitnum);
 	uniformid = glGetUniformLocation(programid, uniformname.c_str());
@@ -192,5 +190,6 @@ void Texture::Init(int unitnum, GLint programid)
 
 void Texture::BindUniformData()
 {
+	glBindTexture(GL_TEXTURE_2D, textureobj);
 	glUniform1i(uniformid, unitnumber);
 }

@@ -21,6 +21,7 @@ public:
 	void BindUniformData();
 
 	std::string uniformname;
+	GLuint textureobj;
 	GLint uniformid;
 	int unitnumber;
 };
