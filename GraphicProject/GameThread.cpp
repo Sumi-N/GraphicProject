@@ -6,11 +6,13 @@
 
 #include "Material.h"
 #include "Object.h"
+#include "Quad.h"
 #include "Camera.h"
 #include "FileLoader.h"
 #include "main.h"
 
 extern Object teapot;
+extern Quad quad;
 extern Camera camera;
 extern DataRequiredForGameThread * BeginReadByGameThread;
 extern DataRequiredForGameThread * BeginSubmittedByRenderThread;
@@ -55,6 +57,7 @@ extern DataRequiredForGameThread * BeginSubmittedByRenderThread;
 
 			timer.Run();
 			teapot.mesh->Update();
+			quad.mesh->Update();
 			camera.Update(timer.time.dt);
 
 			// Check if render thread is ready to get date from game thread
@@ -67,6 +70,7 @@ extern DataRequiredForGameThread * BeginSubmittedByRenderThread;
 			{
 				// Submit data in this scope
 				SubmitObjectData(&teapot);
+				SubmitObjectData(&quad);
 				SubmitCameraData(&camera);
 				SubmitLightingData();
 			}

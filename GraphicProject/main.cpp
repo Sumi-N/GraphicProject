@@ -13,8 +13,10 @@
 #include "FileLoader.h"
 #include "Camera.h"
 #include "Light.h"
+#include "Quad.h"
 #include "Event.h"
 #include "ConstantBuffer.h"
+#include "FrameBuffer.h"
 
 // About threading
 #include <thread>
@@ -29,12 +31,7 @@ AmbientLight ambientlight;
 PointLight pointlight;
 GLuint program;
 
-// Render texture
-GLuint renderedtexture;
-GLuint texture_depth;
-GLuint framebufferid;
-Mesh * quad;
-Material* material2;
+Quad quad;
 
 struct DataRequiredForBuffer
 {
@@ -49,6 +46,8 @@ ConstantBuffer const_buffer_frame(ConstantBufferTypes::Frame);
 ConstantBuffer const_buffer_drawcall(ConstantBufferTypes::DrawCall);
 ConstantBuffer const_buffer_material(ConstantBufferTypes::Material);
 ConstantBuffer const_buffer_light(ConstantBufferTypes::Light);
+
+FrameBuffer framebuffer;
 
 DataRequiredForBuffer dataRequiredForBuffer[2];
 DataRequiredForBuffer * BeginSubmittedByGameThread = &dataRequiredForBuffer[0];
@@ -114,6 +113,12 @@ void InitializeObject()
 	teapot.mesh->material->LoadTexture("../Objfiles/brick.png");
 	teapot.mesh->material->LoadTexture("../Objfiles/brick-specular.png");
 
+	// Setting up quad;
+	quad.Initialize();
+	quad.pos = glm::vec3(0, 0, -20);
+	quad.scale = glm::vec3(1.0, 1.0, 1.0);
+	quad.rot = glm::vec3(0, 0, 00);
+
 	// Setting up position 
 	teapot.pos = glm::vec3(0, 0, -50);
 	teapot.scale = glm::vec3(1.0, 1.0, 1.0);
@@ -123,39 +128,6 @@ void InitializeObject()
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
 	pointlight.position = glm::vec3(20, 20, -50);
-
-	/////////////////////////
-    // Create quad
-	quad = new Mesh();
-	quad->data.resize(6);
-	quad->index.resize(2);
-	quad->data[0].vertex = cy::Point3f(-1.0, -1.0, 0.0);
-	quad->data[1].vertex = cy::Point3f(1.0, -1.0, 0.0);
-	quad->data[2].vertex = cy::Point3f(-1.0, 1.0, 0.0);
-	quad->data[3].vertex = cy::Point3f(-1.0, 1.0, 0.0);
-	quad->data[4].vertex = cy::Point3f(1.0, -1.0, 0.0);
-	quad->data[5].vertex = cy::Point3f(1.0, 1.0, 0.0);
-
-	quad->data[0].uv = cy::Point2f(0.0, 0.0);
-	quad->data[1].uv = cy::Point2f(1.0, 0.0);
-	quad->data[2].uv = cy::Point2f(0.0, 1.0);
-	quad->data[3].uv = cy::Point2f(0.0, 1.0);
-	quad->data[4].uv = cy::Point2f(1.0, 0.0);
-	quad->data[5].uv = cy::Point2f(1.0, 1.0);
-
-	quad->index[0].v[0] = 0;
-	quad->index[0].v[1] = 1;
-	quad->index[0].v[2] = 2;
-	quad->index[1].v[0] = 3;
-	quad->index[1].v[1] = 4;
-	quad->index[1].v[2] = 5;
-
-	quad->InitializeBuffer();
-
-	material2 = new Material();
-	material2->Load("quad.vert.glsl", "quad.frag.glsl");
-
-	////////////////////////////
 }
 
 int InitializeRenderThread()
@@ -219,45 +191,8 @@ int InitializeRenderThread()
 	const_buffer_material.Bind();
 	const_buffer_light.Bind();
 
-	// For render texture    <--------------------------------------->
-	// Create frame buffer
-	glGenFramebuffers(1, &framebufferid);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebufferid);
-
-	// Create empty textures
-	glGenTextures(1, &renderedtexture);
-	glBindTexture(GL_TEXTURE_2D, renderedtexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WIDTH, HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-	// Create empty texture for depth
-	glGenTextures(1, &texture_depth);
-	glBindTexture(GL_TEXTURE_2D, texture_depth);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, WIDTH, HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-
-	// bind texture to framebuffer
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + 0, renderedtexture, 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_depth, 0);//optional
-
-	GLenum drawbuffers[1] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, drawbuffers);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{  //Check for FBO completeness
-		std::cout << "Error! FrameBuffer is not complete" << std::endl;
-		std::cin.get();
-		std::terminate();
-	}
-
-	// Set back to original back buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);    //unbind framebuffer
+	// Instantiate framebuffer
+	framebuffer.Initialize(WIDTH, HEIGHT);
 }
 
 int main()
@@ -289,7 +224,7 @@ int main()
 
 		glfwPollEvents();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, framebufferid);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.bufferid);
 		{
 			// Renderring part
 			{
@@ -319,18 +254,29 @@ int main()
 				}
 			}
 		}
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			glUseProgram(material2->programid);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, renderedtexture);
-			glUniform1i(glGetUniformLocation(material2->programid, "texture0"), 0);
+			// Submit Camera Information
+			auto & const_data_frame = BeginRenderedByRenderThread->frame;
+			const_buffer_frame.Update(&const_data_frame);
 
-			quad->Draw();
+			for (int i = 0; i < BeginRenderedByRenderThread->objectlist.size(); i++)
+			{
+				auto & const_data_draw = BeginRenderedByRenderThread->drawcalllist[i];
+				const_data_draw.mvp = const_data_frame.cvp * const_data_draw.mwt;
+				const_buffer_drawcall.Update(&const_data_draw);
+
+				glUseProgram(quad.mesh->material->programid);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, framebuffer.targettexture);
+				glUniform1i(glGetUniformLocation(quad.mesh->material->programid, "texture0"), 0);
+
+				quad.mesh->Draw();
+			}
 		}
-
 
 		glfwSwapBuffers(window);
 
