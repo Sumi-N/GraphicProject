@@ -18,5 +18,5 @@ void main()
 	texcoord                   = model_texcoord;
 
 	// Send position data at perspective coordinate
-	gl_Position                = model_view_perspective_matrix * vec4(model_position, 1) + vec4(1, 0, 0, 0);
+	gl_Position                = model_view_perspective_matrix * vec4(model_position, 1);
 }
