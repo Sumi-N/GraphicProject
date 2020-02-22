@@ -10,7 +10,6 @@
 
 #include "Constatnt.h"
 #include "Utility.h"
-#include "FileLoader.h"
 #include "Camera.h"
 #include "Light.h"
 #include "Quad.h"
@@ -37,17 +36,17 @@ CubeMap cubemap;
 
 struct DataRequiredForBuffer
 {
-	ConstantBufferFormat::Frame frame;
-	ConstantBufferFormat::Light light;
-	std::vector<ConstantBufferFormat::DrawCall> drawcalllist;
-	std::vector<ConstantBufferFormat::Material> materiallist;
+	ConstantData::Camera frame;
+	ConstantData::Light light;
+	std::vector<ConstantData::Object> drawcalllist;
+	std::vector<ConstantData::Material> materiallist;
 	std::vector<Object *> objectlist;
 };
 
-ConstantBuffer const_buffer_frame(ConstantBufferTypes::Frame);
-ConstantBuffer const_buffer_drawcall(ConstantBufferTypes::DrawCall);
-ConstantBuffer const_buffer_material(ConstantBufferTypes::Material);
-ConstantBuffer const_buffer_light(ConstantBufferTypes::Light);
+ConstantBuffer const_buffer_frame;
+ConstantBuffer const_buffer_drawcall;
+ConstantBuffer const_buffer_material;
+ConstantBuffer const_buffer_light;
 
 FrameBuffer framebuffer;
 
@@ -76,12 +75,12 @@ void SubmitObjectData(Object * obj)
 {
 	BeginSubmittedByGameThread->objectlist.push_back(obj);
 
-	ConstantBufferFormat::DrawCall drawcall;
-	drawcall.mit = obj->mesh->model_vec_mat;
-	drawcall.mwt = obj->mesh->model_pos_mat;
+	ConstantData::Object drawcall;
+	drawcall.model_inverse_transpose_matrix = obj->mesh->model_vec_mat;
+	drawcall.model_position_matrix = obj->mesh->model_pos_mat;
 	BeginSubmittedByGameThread->drawcalllist.push_back(drawcall);
 
-	ConstantBufferFormat::Material material;
+	ConstantData::Material material;
 	material.specular = glm::vec4(obj->mesh->material->Ks[0], obj->mesh->material->Ks[1], obj->mesh->material->Ks[2], obj->mesh->material->Ns);
 	material.diffuse = glm::vec4(obj->mesh->material->Kd[0], obj->mesh->material->Kd[1], obj->mesh->material->Kd[2], 1.0);
 	BeginSubmittedByGameThread->materiallist.push_back(material);
@@ -89,14 +88,14 @@ void SubmitObjectData(Object * obj)
 
 void SubmitCameraData(Camera * camera)
 {
-	BeginSubmittedByGameThread->frame.cwp = camera->pos;
-	BeginSubmittedByGameThread->frame.cvp = camera->view_perspective_mat;
+	BeginSubmittedByGameThread->frame.camera_position_vector = camera->pos;
+	BeginSubmittedByGameThread->frame.view_perspective_matrix = camera->view_perspective_mat;
 }
 
 void SubmitLightingData()
 {
-	BeginSubmittedByGameThread->light.ambientintensity = glm::vec4(ambientlight.intensity, 1.0);
-	BeginSubmittedByGameThread->light.pointintensity = glm::vec4(pointlight.intensity, 1.0);
+	BeginSubmittedByGameThread->light.light_ambient_intensity = glm::vec4(ambientlight.intensity, 1.0);
+	BeginSubmittedByGameThread->light.light_point_intensity = glm::vec4(pointlight.intensity, 1.0);
 	BeginSubmittedByGameThread->light.pointposition = glm::vec4(pointlight.position, 1.0);
 }
 
@@ -107,7 +106,7 @@ void InitializeObject()
 	mesh->Init();
 
 	Material* material = new Material();
-	material->Load("../Assets/Shaders/blinn_phong.vert.glsl", "../Assets/Shaders/blinn_phong.frag.glsl");
+	material->LoadShader("../Assets/Shaders/blinn_phong.vert.glsl", "../Assets/Shaders/blinn_phong.frag.glsl");
 
 	teapot.SetMesh(mesh);
 	mesh->SetMaterial(material);
@@ -190,11 +189,11 @@ int InitializeRenderThread()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	// Bind Uniform buffer
-	const_buffer_drawcall.Bind();
-	const_buffer_frame.Bind();
-	const_buffer_material.Bind();
-	const_buffer_light.Bind();
+	// Init Uniform buffer
+	const_buffer_frame.Init(ConstantData::Index::Camera, ConstantData::Size::Camera);
+	const_buffer_drawcall.Init(ConstantData::Index::Object, ConstantData::Size::Object);
+	const_buffer_material.Init(ConstantData::Index::Material, ConstantData::Size::Material);
+	const_buffer_light.Init(ConstantData::Index::Light, ConstantData::Size::Light);
 
 	// Instantiate framebuffer
 	framebuffer.Initialize(WIDTH, HEIGHT);
@@ -242,7 +241,7 @@ int main()
 		glActiveTexture(GL_TEXTURE0 + 5);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.textureid);
 		GLint vp_location = glGetUniformLocation(cubemap.mesh->material->programid, "view_perspective_matrix");
-		glm::mat4 pos = const_data_frame.cvp * glm::translate(glm::mat4(1.0), const_data_frame.cwp);;
+		glm::mat4 pos = const_data_frame.view_perspective_matrix * glm::translate(glm::mat4(1.0), const_data_frame.camera_position_vector);;
 		glUniformMatrix4fv(vp_location, 1, GL_FALSE, &pos[0][0]);
 		glUniform1i(cubemap.tmptexture.uniformid, 5);
 		cubemap.mesh->Draw();
@@ -264,7 +263,7 @@ int main()
 				for (int i = 0; i < BeginRenderedByRenderThread->objectlist.size(); i++)
 				{
 					auto & const_data_draw = BeginRenderedByRenderThread->drawcalllist[i];
-					const_data_draw.mvp = const_data_frame.cvp * const_data_draw.mwt;
+					const_data_draw.model_view_perspective_matrix = const_data_frame.view_perspective_matrix * const_data_draw.model_position_matrix;
 					const_buffer_drawcall.Update(&const_data_draw);
 
 					auto & const_data_material = BeginRenderedByRenderThread->materiallist[i];

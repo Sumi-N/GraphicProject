@@ -9,7 +9,7 @@
 #include "lodepng.h"
 #include "Utility.h"
 
-void Material::Load(const char * vert, const char * frag)
+void Material::LoadShader(const char * vert, const char * frag)
 {
 	std::vector<GLchar> vertsrc;
 	std::vector<GLchar> fragsrc;
@@ -71,15 +71,6 @@ void Material::Load(const char * vert, const char * frag)
 	//glDeleteProgram(programid);
 }
 
-void Material::LoadTexture(const char * filename)
-{
-	Texture texture;
-	texture.Load(filename);
-	int unitnumber = texturelist.size();
-	texture.Init(unitnumber, programid);
-	texturelist.push_back(texture);
-}
-
 void Material::BindShader()
 {
 	glUseProgram(programid);
@@ -90,6 +81,15 @@ void Material::BindShader()
 			texturelist[i].BindUniformData();
 		}
 	}
+}
+
+void Material::LoadTexture(const char * filename)
+{
+	Texture texture;
+	texture.Load(filename);
+	int unitnumber = static_cast<int>(texturelist.size());
+	texture.Init(unitnumber, programid);
+	texturelist.push_back(texture);
 }
 
 bool Material::ReadShaderSource(const char* filename, std::vector<GLchar> &buffer)

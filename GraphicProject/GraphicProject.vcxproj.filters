@@ -32,9 +32,6 @@
     <ClInclude Include="Constatnt.h">
       <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
-    <ClInclude Include="FileLoader.h">
-      <Filter>Header Files\GraphicsThread</Filter>
-    </ClInclude>
     <ClInclude Include="Input.h">
       <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
@@ -91,9 +88,6 @@
     <ClCompile Include="lodepng.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -120,6 +114,9 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EntryPoint.cpp">
+      <Filter>Header Files\Share</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

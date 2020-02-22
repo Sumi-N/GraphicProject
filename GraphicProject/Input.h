@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include <mutex>
 #include "Camera.h"
-#include "FileLoader.h"
 #include <GLFW/glfw3.h>
 
 extern GLFWwindow * window;
@@ -37,11 +36,6 @@ namespace Input {
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
 			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
-
-		if (key == GLFW_KEY_F6 && action == GLFW_PRESS)
-		{
-			FileLoader::recompileShader();
 		}
 
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))

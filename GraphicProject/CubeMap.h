@@ -55,7 +55,7 @@ inline void CubeMap::Initialize()
 
 	////////////////////////////////////
 	mesh->material = new Material();
-	mesh->material->Load("../Assets/Shaders/environmentmap.vert.glsl", "../Assets/Shaders/environmentmap.frag.glsl");
+	mesh->material->LoadShader("../Assets/Shaders/environmentmap.vert.glsl", "../Assets/Shaders/environmentmap.frag.glsl");
 
 	tmptexture.uniformid = glGetUniformLocation(mesh->material->programid, "skybox");
 	if (tmptexture.uniformid == -1)

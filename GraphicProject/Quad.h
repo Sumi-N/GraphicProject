@@ -41,6 +41,6 @@ inline void Quad::Initialize()
 	mesh->InitializeBuffer();
 
 	mesh->material = new Material();
-	mesh->material->Load("../Assets/Shaders/quad.vert.glsl", "../Assets/Shaders/quad.frag.glsl");
+	mesh->material->LoadShader("../Assets/Shaders/quad.vert.glsl", "../Assets/Shaders/quad.frag.glsl");
 }
 

@@ -21,7 +21,7 @@ public:
 	GLuint programid = 0;
 	std::vector<Texture> texturelist;
 
-	void Load(const char * vert, const char * frag);
+	void LoadShader(const char * vert, const char * frag);
 	void BindShader();
 
 	void LoadTexture(const char *);

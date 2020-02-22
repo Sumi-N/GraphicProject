@@ -4,14 +4,14 @@ layout (location = 0) in vec3 model_position;
 layout (location = 1) in vec3 model_normal;
 layout (location = 2) in vec2 model_texcoord;
 
-layout (std140, binding = 0) uniform constant_frame
+layout (std140, binding = 0) uniform const_camera
 {
 	mat4 view_perspective_matrix;
 	vec3 camera_position_vector;
 	float padding;
 };
 
-layout (std140, binding = 1) uniform const_drawcall
+layout (std140, binding = 1) uniform const_object
 {
 	mat4 model_position_matrix;
 	mat4 model_view_perspective_matrix;

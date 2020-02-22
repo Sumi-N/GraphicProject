@@ -8,7 +8,6 @@
 #include "Object.h"
 #include "Quad.h"
 #include "Camera.h"
-#include "FileLoader.h"
 #include "main.h"
 
 extern Object teapot;

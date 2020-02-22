@@ -1,64 +1,71 @@
 #pragma once
+#include <vector>
+#include <tuple>
+#include <string>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
 
-namespace ConstantBufferFormat
+namespace ConstantData
 {
-	struct Frame
+	struct Camera 
 	{
-		// camera view perspective
-		glm::mat4 cvp;
-		// camera world position
-		glm::vec3 cwp;
+		glm::mat4 view_perspective_matrix;
+		glm::vec3 camera_position_vector;
 
 		float padding;
 	};
 
-	struct DrawCall
+	struct Object 
 	{
-		// model world transformation
-		glm::mat4 mwt;
-		// model view perspective
-		glm::mat4 mvp;
-		// model inverse transpose 
-		glm::mat3 mit;
+		glm::mat4 model_position_matrix;
+		glm::mat4 model_view_perspective_matrix;
+		glm::mat3 model_inverse_transpose_matrix;
 	};
 
-	struct Material
+	struct Material 
 	{
 		glm::vec4 diffuse;
 		glm::vec4 specular;
 	};
 
-	struct Light
+	struct Light 
 	{
-		glm::vec4 ambientintensity;
-		glm::vec4 pointintensity;
+		glm::vec4 light_ambient_intensity;
+		glm::vec4 light_point_intensity;
 		glm::vec4 pointposition;
 	};
 
-}
+	/////////////////// Don't forget to add index and size data after addding a new uniform data //////////////
 
-enum class ConstantBufferTypes : uint8_t
-{
-	Frame = 0,
-	DrawCall = 1,
-	Material = 2,
-	Light = 3,
-};
+	enum class Index : uint8_t
+	{
+		Camera   = 0,
+		Object   = 1,
+		Material = 2,
+		Light    = 3,
+	};
+
+	enum class Size : uint8_t
+	{
+		Camera = sizeof(ConstantData::Camera),
+		Object   = sizeof(ConstantData::Object),
+		Material = sizeof(ConstantData::Material),
+		Light    = sizeof(ConstantData::Light),
+	};
+}
 
 class ConstantBuffer
 {
 public:
 	ConstantBuffer();
-	ConstantBuffer(ConstantBufferTypes i_type);
 	~ConstantBuffer();
 
 	GLuint bufferid = 0;
-	ConstantBufferTypes type;
-	size_t size;
+	GLuint index;
+	GLsizeiptr size;
 
-	void Bind();
-	void Update(const void* const i_data);
+	void Init(ConstantData::Index, ConstantData::Size);
+	void Update(const void* const);
 };
 
