@@ -103,17 +103,17 @@ void SubmitLightingData()
 void InitializeObject()
 {
 	Mesh* mesh = new Mesh();
-	mesh->Load("../Objfiles/teapot.obj");
+	mesh->Load("../Assets/Meshes/teapot.obj");
 	mesh->Init();
 
 	Material* material = new Material();
-	material->Load("blinn_phong.vert.glsl", "blinn_phong.frag.glsl");
+	material->Load("../Assets/Shaders/blinn_phong.vert.glsl", "../Assets/Shaders/blinn_phong.frag.glsl");
 
 	teapot.SetMesh(mesh);
 	mesh->SetMaterial(material);
 
-	teapot.mesh->material->LoadTexture("../Objfiles/brick.png");
-	teapot.mesh->material->LoadTexture("../Objfiles/brick-specular.png");
+	teapot.mesh->material->LoadTexture("../Assets/Textures/brick.png");
+	teapot.mesh->material->LoadTexture("../Assets/Textures/brick-specular.png");
 
 	// Setting up quad;
 	quad.Initialize();
@@ -242,7 +242,8 @@ int main()
 		glActiveTexture(GL_TEXTURE0 + 5);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.textureid);
 		GLint vp_location = glGetUniformLocation(cubemap.mesh->material->programid, "view_perspective_matrix");
-		glUniformMatrix4fv(vp_location, 1, GL_FALSE, &const_data_frame.cvp[0][0]);
+		glm::mat4 pos = const_data_frame.cvp * glm::translate(glm::mat4(1.0), const_data_frame.cwp);;
+		glUniformMatrix4fv(vp_location, 1, GL_FALSE, &pos[0][0]);
 		glUniform1i(cubemap.tmptexture.uniformid, 5);
 		cubemap.mesh->Draw();
 		glDepthMask(GL_TRUE);

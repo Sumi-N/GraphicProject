@@ -15,10 +15,6 @@
     <Filter Include="Header Files\GameThread">
       <UniqueIdentifier>{503e4ca7-00e2-4d63-a9a4-775d9ea23f8d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shader Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Header Files\Share">
       <UniqueIdentifier>{cfe00432-97a9-491a-86bd-ad19da1e8b20}</UniqueIdentifier>
     </Filter>
@@ -81,20 +77,6 @@
     <ClInclude Include="CubeMap.h">
       <Filter>Header Files\GameThread</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="blinn_phong.frag.glsl">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="blinn_phong.vert.glsl">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="quad.frag.glsl">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="quad.vert.glsl">
-      <Filter>Shader Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
