@@ -37,15 +37,21 @@ void Mesh::Init()
 		index[i].v[1] = tmpdata.F(i).v[1];
 		index[i].v[2] = tmpdata.F(i).v[2];
 
-		// Sort normal to vertex index
-		data[tmpdata.F(i).v[0]].normal = tmpdata.VN(tmpdata.FN(i).v[0]);
-		data[tmpdata.F(i).v[1]].normal = tmpdata.VN(tmpdata.FN(i).v[1]);
-		data[tmpdata.F(i).v[2]].normal = tmpdata.VN(tmpdata.FN(i).v[2]);
+		if(tmpdata.NVN() != 0)
+		{
+			// Sort normal to vertex index
+			data[tmpdata.F(i).v[0]].normal = tmpdata.VN(tmpdata.FN(i).v[0]);
+			data[tmpdata.F(i).v[1]].normal = tmpdata.VN(tmpdata.FN(i).v[1]);
+			data[tmpdata.F(i).v[2]].normal = tmpdata.VN(tmpdata.FN(i).v[2]);
+		}
 
-		// Sort uv coordinate to vertex index
-		data[tmpdata.F(i).v[0]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[0]));
-		data[tmpdata.F(i).v[1]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[1]));
-		data[tmpdata.F(i).v[2]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[2]));
+		if (tmpdata.NVT() != 0)
+		{
+			// Sort uv coordinate to vertex index
+			data[tmpdata.F(i).v[0]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[0]));
+			data[tmpdata.F(i).v[1]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[1]));
+			data[tmpdata.F(i).v[2]].uv = cy::Point2f(tmpdata.VT(tmpdata.FT(i).v[2]));
+		}
 	}
 
 	InitializeBuffer();

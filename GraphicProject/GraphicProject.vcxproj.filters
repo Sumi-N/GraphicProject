@@ -79,7 +79,7 @@
       <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
     <ClInclude Include="CubeMap.h">
-      <Filter>Header Files\GraphicsThread</Filter>
+      <Filter>Header Files\GameThread</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

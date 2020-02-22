@@ -229,6 +229,9 @@ int main()
 
 		glfwPollEvents();
 
+		// Clear window
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		// Cube mapping
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		auto & const_data_frame = BeginRenderedByRenderThread->frame;
@@ -240,6 +243,7 @@ int main()
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.textureid);
 		GLint vp_location = glGetUniformLocation(cubemap.mesh->material->programid, "view_perspective_matrix");
 		glUniformMatrix4fv(vp_location, 1, GL_FALSE, &const_data_frame.cvp[0][0]);
+		glUniform1i(cubemap.tmptexture.uniformid, 5);
 		cubemap.mesh->Draw();
 		glDepthMask(GL_TRUE);
 
@@ -247,8 +251,6 @@ int main()
 		{
 			// Renderring part
 			{
-				// Clear window
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				// Submit Camera Information
 				auto & const_data_frame = BeginRenderedByRenderThread->frame;
