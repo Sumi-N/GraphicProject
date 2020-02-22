@@ -36,6 +36,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="Constatnt.h" />
+    <ClInclude Include="CubeMap.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="FileLoader.h" />
     <ClInclude Include="FrameBuffer.h" />

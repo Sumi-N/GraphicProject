@@ -14,6 +14,7 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Quad.h"
+#include "CubeMap.h"
 #include "Event.h"
 #include "ConstantBuffer.h"
 #include "FrameBuffer.h"
@@ -32,6 +33,7 @@ PointLight pointlight;
 GLuint program;
 
 Quad quad;
+CubeMap cubemap;
 
 struct DataRequiredForBuffer
 {
@@ -128,6 +130,9 @@ void InitializeObject()
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
 	pointlight.position = glm::vec3(20, 20, -50);
+
+	// Setting up environment map
+	cubemap.Initialize();
 }
 
 int InitializeRenderThread()
@@ -193,44 +198,6 @@ int InitializeRenderThread()
 
 	// Instantiate framebuffer
 	framebuffer.Initialize(WIDTH, HEIGHT);
-
-	GLuint textureid;
-	glGenTextures(1, &textureid);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureid);
-
-	Texture tmptexture;
-	int tmpwidth, tmpheight;
-
-	std::vector<cy::Color24> data;
-	tmptexture.Load("../Objfiles/cubemap_posx.png", data, tmpwidth, tmpheight);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
-
-	std::vector<cy::Color24> data2;
-	tmptexture.Load("../Objfiles/cubemap_negx.png", data2, tmpwidth, tmpheight);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data2.data());
-
-	std::vector<cy::Color24> data3;
-	tmptexture.Load("../Objfiles/cubemap_posy.png", data3, tmpwidth, tmpheight);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data3.data());
-
-	std::vector<cy::Color24> data4;
-	tmptexture.Load("../Objfiles/cubemap_negy.png", data4, tmpwidth, tmpheight);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data4.data());
-
-	std::vector<cy::Color24> data5;
-	tmptexture.Load("../Objfiles/cubemap_posz.png", data5, tmpwidth, tmpheight);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data5.data());
-
-	std::vector<cy::Color24> data6;
-	tmptexture.Load("../Objfiles/cubemap_negz.png", data6, tmpwidth, tmpheight);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data6.data());
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
 }
 
 int main()
@@ -262,7 +229,21 @@ int main()
 
 		glfwPollEvents();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.bufferid);
+		// Cube mapping
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		auto & const_data_frame = BeginRenderedByRenderThread->frame;
+		const_buffer_frame.Update(&const_data_frame);
+
+		glDepthMask(GL_FALSE);
+		glUseProgram(cubemap.mesh->material->programid);
+		glActiveTexture(GL_TEXTURE0 + 5);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.textureid);
+		GLint vp_location = glGetUniformLocation(cubemap.mesh->material->programid, "view_perspective_matrix");
+		glUniformMatrix4fv(vp_location, 1, GL_FALSE, &const_data_frame.cvp[0][0]);
+		cubemap.mesh->Draw();
+		glDepthMask(GL_TRUE);
+
+		//glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.bufferid);
 		{
 			// Renderring part
 			{
@@ -286,35 +267,35 @@ int main()
 					auto & const_data_material = BeginRenderedByRenderThread->materiallist[i];
 					const_buffer_material.Update(&const_data_material);
 
-					// Submit shader program and get texture unifrom
+					// Submit shader program and get texture uniform
 					BeginRenderedByRenderThread->objectlist[i]->mesh->material->BindShader();
 					BeginRenderedByRenderThread->objectlist[i]->mesh->Draw();
 				}
 			}
 		}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//{
+		//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// Submit Camera Information
-			auto & const_data_frame = BeginRenderedByRenderThread->frame;
-			const_buffer_frame.Update(&const_data_frame);
+		//	// Submit Camera Information
+		//	auto & const_data_frame = BeginRenderedByRenderThread->frame;
+		//	const_buffer_frame.Update(&const_data_frame);
 
-			for (int i = 0; i < BeginRenderedByRenderThread->objectlist.size(); i++)
-			{
-				auto & const_data_draw = BeginRenderedByRenderThread->drawcalllist[i];
-				const_data_draw.mvp = const_data_frame.cvp * const_data_draw.mwt;
-				const_buffer_drawcall.Update(&const_data_draw);
+		//	for (int i = 0; i < BeginRenderedByRenderThread->objectlist.size(); i++)
+		//	{
+		//		auto & const_data_draw = BeginRenderedByRenderThread->drawcalllist[i];
+		//		const_data_draw.mvp = const_data_frame.cvp * const_data_draw.mwt;
+		//		const_buffer_drawcall.Update(&const_data_draw);
 
-				glUseProgram(quad.mesh->material->programid);
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, framebuffer.targettexture);
-				glUniform1i(glGetUniformLocation(quad.mesh->material->programid, "texture0"), 0);
+		//		glUseProgram(quad.mesh->material->programid);
+		//		glActiveTexture(GL_TEXTURE0);
+		//		glBindTexture(GL_TEXTURE_2D, framebuffer.targettexture);
+		//		glUniform1i(glGetUniformLocation(quad.mesh->material->programid, "texture0"), 0);
 
-				quad.mesh->Draw();
-			}
-		}
+		//		quad.mesh->Draw();
+		//	}
+		//}
 
 		glfwSwapBuffers(window);
 

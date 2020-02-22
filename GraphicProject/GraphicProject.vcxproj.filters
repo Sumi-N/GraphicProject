@@ -73,10 +73,13 @@
       <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
     <ClInclude Include="Quad.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\GameThread</Filter>
     </ClInclude>
     <ClInclude Include="FrameBuffer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\GraphicsThread</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMap.h">
+      <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
