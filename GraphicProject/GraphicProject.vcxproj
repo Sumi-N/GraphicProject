@@ -30,6 +30,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Quad.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -50,6 +51,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="Quad.h" />
     <ClInclude Include="RenderTexture.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>

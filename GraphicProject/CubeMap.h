@@ -2,6 +2,7 @@
 
 #include "Object.h"
 #include "Material.h"
+#include "Texture.h"
 
 class CubeMap : public Object
 {
