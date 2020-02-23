@@ -25,6 +25,7 @@ public:
 	void BindShader();
 
 	void LoadTexture(const char *);
+	void LoadCubeMapTexture(const char **);
 
 
 private:

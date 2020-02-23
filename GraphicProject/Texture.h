@@ -17,14 +17,14 @@ public:
 	int width, height;
 
 	bool Load(char const *);
-	//bool Load(char const *, std::vector<cy::Color24> &, int &, int &);
 	void Init(int unitnum, GLint programid);
+	void InitCubeMap(int unitnum, GLint programid, const char ** filenames);
 	void BindTexture();
 
 	void CreateTexture(GLint internalformat, GLuint width, GLuint height);
 
 	std::string uniformname;
-	GLuint textureobj;
+	GLuint textureid;
 	GLuint unitnumber;
 	GLint uniformid;
 };

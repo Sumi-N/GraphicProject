@@ -92,6 +92,13 @@ void Material::LoadTexture(const char * filename)
 	texturelist.push_back(texture);
 }
 
+void Material::LoadCubeMapTexture(const char ** filenames)
+{
+	Texture cubemap;
+	cubemap.InitCubeMap(0, programid, filenames);
+	texturelist.push_back(cubemap);
+}
+
 bool Material::ReadShaderSource(const char* filename, std::vector<GLchar> &buffer)
 {
 	if (filename == nullptr)

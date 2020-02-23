@@ -20,6 +20,5 @@ public:
 	GLsizei height;
 
 	void Init(int width, int height);
-	void Bind();
 };
 

@@ -26,8 +26,8 @@ void FrameBuffer::Init(int width, int height)
 	depth.CreateTexture(GL_DEPTH_COMPONENT, width, height);
 
 	// bind textures to framebuffer
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, color.textureobj, 0);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth.textureobj, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, color.textureid, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth.textureid, 0);
 
 	GLenum drawbuffers[1] = { GL_COLOR_ATTACHMENT0 };
 	glDrawBuffers(1, drawbuffers);
@@ -41,10 +41,4 @@ void FrameBuffer::Init(int width, int height)
 
 	// Set back to original back buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void FrameBuffer::Bind()
-{
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, color.textureobj);
 }

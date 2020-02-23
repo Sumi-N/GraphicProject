@@ -131,7 +131,7 @@ void InitializeObject()
 	pointlight.position = glm::vec3(0, 0, -20);
 
 	// Setting up environment map
-	//cubemap.Initialize();
+	cubemap.Init();
 }
 
 int InitializeRenderThread()
@@ -228,23 +228,6 @@ int main()
 
 		glfwPollEvents();
 
-		// Clear window
-		
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//auto & const_data_frame = BeginRenderedByRenderThread->frame;
-		//const_buffer_frame.Update(&const_data_frame);
-
-		//glDepthMask(GL_FALSE);
-		//glUseProgram(cubemap.mesh->material->programid);
-		//glActiveTexture(GL_TEXTURE0 + 5);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap.textureid);
-		//GLint vp_location = glGetUniformLocation(cubemap.mesh->material->programid, "view_perspective_matrix");
-		//glm::mat4 pos = const_data_frame.view_perspective_matrix * glm::translate(glm::mat4(1.0), const_data_frame.camera_position_vector);;
-		//glUniformMatrix4fv(vp_location, 1, GL_FALSE, &pos[0][0]);
-		//glUniform1i(cubemap.tmptexture.uniformid, 5);
-		//cubemap.mesh->Draw();
-		//glDepthMask(GL_TRUE);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.bufferid);
 		{	
@@ -279,6 +262,21 @@ int main()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			auto & const_data_frame = BeginRenderedByRenderThread->frame;
+			const_buffer_frame.Update(&const_data_frame);
+
+			glDepthMask(GL_FALSE);
+			cubemap.mesh->material->BindShader();
+			GLint vp_location = glGetUniformLocation(cubemap.mesh->material->programid, "view_perspective_matrix");
+			glm::mat4 pos = const_data_frame.view_perspective_matrix * glm::translate(glm::mat4(1.0), const_data_frame.camera_position_vector);;
+			glUniformMatrix4fv(vp_location, 1, GL_FALSE, &pos[0][0]);
+			cubemap.mesh->Draw();
+			glDepthMask(GL_TRUE);
+		}
+
+
+		{
+			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// Submit Camera Information
 			auto & const_data_frame = BeginRenderedByRenderThread->frame;
@@ -290,10 +288,7 @@ int main()
 				const_data_draw.model_view_perspective_matrix = const_data_frame.view_perspective_matrix * const_data_draw.model_position_matrix;
 				const_buffer_drawcall.Update(&const_data_draw);
 
-				framebuffer.Bind();
-				glUseProgram(quad.mesh->material->programid);
-				glUniform1i(glGetUniformLocation(quad.mesh->material->programid, "texture0"), 0);
-
+				quad.Bind(framebuffer);
 				quad.mesh->Draw();
 			}
 		}

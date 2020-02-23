@@ -23,5 +23,8 @@ void Quad::Init()
 
 void Quad::Bind(FrameBuffer framebuffer)
 {
-
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, framebuffer.color.textureid);
+	glUseProgram(mesh->material->programid);
+	glUniform1i(glGetUniformLocation(mesh->material->programid, "texture0"), 0);
 }

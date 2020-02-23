@@ -8,9 +8,6 @@ class CubeMap : public Object
 {
 public:
 	void Init();
-
-	GLuint textureid;
-	Texture tmptexture;
 };
 
 inline void CubeMap::Init()
@@ -20,47 +17,16 @@ inline void CubeMap::Init()
 	mesh->Load("../Assets/Meshes/cubemap.obj");
 	mesh->Init();
 
-	////////////////////////////////////
-	glActiveTexture(GL_TEXTURE0 + 5);
-	glGenTextures(1, &textureid);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureid);
-
-	int tmpwidth, tmpheight;
-
-	//std::vector<cy::Color24> data;
-	//tmptexture.Load("../Assets/Textures/cubemap_posx.png", data, tmpwidth, tmpheight);
-	//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
-
-	//tmptexture.Load("../Assets/Textures/cubemap_negx.png", data, tmpwidth, tmpheight);
-	//glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
-
-	//tmptexture.Load("../Assets/Textures/cubemap_posy.png", data, tmpwidth, tmpheight);
-	//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
-
-	//tmptexture.Load("../Assets/Textures/cubemap_negy.png", data, tmpwidth, tmpheight);
-	//glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
-
-	//tmptexture.Load("../Assets/Textures/cubemap_posz.png", data, tmpwidth, tmpheight);
-	//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
-
-	//tmptexture.Load("../Assets/Textures/cubemap_negz.png", data, tmpwidth, tmpheight);
-	//glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, tmpwidth, tmpheight, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-
-	////////////////////////////////////
 	mesh->material = new Material();
 	mesh->material->LoadShader("../Assets/Shaders/environmentmap.vert.glsl", "../Assets/Shaders/environmentmap.frag.glsl");
 
-	tmptexture.uniformid = glGetUniformLocation(mesh->material->programid, "skybox");
-	if (tmptexture.uniformid == -1)
-	{
-		std::cerr << "The sampler cube variable doesn't exist in the shader file" << std::endl;
-	}
+	const char ** filenames = new const char*[6];
+	filenames[0] = "../Assets/Textures/cubemap_posx.png";
+	filenames[1] = "../Assets/Textures/cubemap_negx.png";
+	filenames[2] = "../Assets/Textures/cubemap_posy.png";
+	filenames[3] = "../Assets/Textures/cubemap_negy.png";
+	filenames[4] = "../Assets/Textures/cubemap_posz.png";
+	filenames[5] = "../Assets/Textures/cubemap_negz.png";
 
+	mesh->material->LoadCubeMapTexture(filenames);
 }
