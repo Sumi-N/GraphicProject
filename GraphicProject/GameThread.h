@@ -2,10 +2,6 @@
 
 #include "Timer.h"
 
-namespace Application {
-	int Init();
-}
-
 class GameThread
 {
 public:

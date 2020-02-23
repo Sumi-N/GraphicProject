@@ -56,9 +56,6 @@
     <ClInclude Include="Event.h">
       <Filter>Header Files\Share</Filter>
     </ClInclude>
-    <ClInclude Include="main.h">
-      <Filter>Header Files\GraphicsThread</Filter>
-    </ClInclude>
     <ClInclude Include="ConstantBuffer.h">
       <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
@@ -74,11 +71,11 @@
     <ClInclude Include="Texture.h">
       <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
+    <ClInclude Include="RenderThread.h">
+      <Filter>Header Files\GraphicsThread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -111,6 +108,9 @@
     </ClCompile>
     <ClCompile Include="EntryPoint.cpp">
       <Filter>Header Files\Share</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderThread.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -25,7 +25,7 @@
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="GameThread.cpp" />
     <ClCompile Include="lodepng.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="RenderThread.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Quad.cpp" />
@@ -43,7 +43,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="lodepng.h" />
-    <ClInclude Include="main.h" />
+    <ClInclude Include="RenderThread.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Material.h" />

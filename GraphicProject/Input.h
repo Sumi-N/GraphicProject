@@ -6,7 +6,7 @@
 extern GLFWwindow * window;
 extern Camera camera;
 extern GLuint program;
-extern DataRequiredForGameThread * BeginSubmittedByRenderThread;
+extern DataRenderToGame * BeginSubmittedByRenderThread;
 
 namespace Input {
 

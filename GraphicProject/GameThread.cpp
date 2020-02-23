@@ -1,20 +1,24 @@
 #pragma once
 
 #include "GameThread.h"
-#include <mutex>
-#include <stdio.h>
+#include "RenderThread.h"
 
 #include "Material.h"
 #include "Object.h"
 #include "Quad.h"
 #include "Camera.h"
-#include "main.h"
+#include "CubeMap.h"
+#include "Light.h"
 
-extern Object teapot;
-extern Quad quad;
-extern Camera camera;
-extern DataRequiredForGameThread * BeginReadByGameThread;
-extern DataRequiredForGameThread * BeginSubmittedByRenderThread;
+extern DataRenderToGame * BeginReadByGameThread;
+extern DataRenderToGame * BeginSubmittedByRenderThread;
+
+Camera camera;
+Object teapot;
+AmbientLight ambientlight;
+PointLight pointlight;
+Quad quad;
+CubeMap cubemap;
 
 	GameThread::GameThread()
 	{
@@ -27,6 +31,7 @@ extern DataRequiredForGameThread * BeginSubmittedByRenderThread;
 
 	void GameThread::Init()
 	{
+		// Initialize timer
 		timer.Init();
 	}
 
@@ -77,18 +82,3 @@ extern DataRequiredForGameThread * BeginSubmittedByRenderThread;
 			SignalTheDataHasBeenSubmitted();
 		}
 	}
-
-namespace Application {
-
-	int Init()
-	{
-		printf("I start the other thread\n");
-
-		GameThread gamethread;
-
-		gamethread.Init();
-		gamethread.Run();
-	
-		return 0;
-	}
-}
