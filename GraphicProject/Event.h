@@ -19,7 +19,7 @@ public:
 	Event();
 	~Event();
 
-	void Initialize(const EventType i_type, const EventState i_initialstate = EventState::Unsignaled);
+	void Init(const EventType i_type, const EventState i_initialstate = EventState::Unsignaled);
 	bool Signal();
 	void ResetToUnsignaled();
 

@@ -17,12 +17,14 @@ public:
 	int width, height;
 
 	bool Load(char const *);
-	bool Load(char const *, std::vector<cy::Color24> &, int &, int &);
+	//bool Load(char const *, std::vector<cy::Color24> &, int &, int &);
 	void Init(int unitnum, GLint programid);
-	void BindUniformData();
+	void BindTexture();
+
+	void CreateTexture(GLint internalformat, GLuint width, GLuint height);
 
 	std::string uniformname;
 	GLuint textureobj;
+	GLuint unitnumber;
 	GLint uniformid;
-	int unitnumber;
 };

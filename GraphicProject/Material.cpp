@@ -78,7 +78,7 @@ void Material::BindShader()
 	{
 		for (int i = 0; i < texturelist.size(); i++)
 		{
-			texturelist[i].BindUniformData();
+			texturelist[i].BindTexture();
 		}
 	}
 }

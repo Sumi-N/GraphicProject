@@ -69,7 +69,7 @@ extern DataRequiredForGameThread * BeginSubmittedByRenderThread;
 			{
 				// Submit data in this scope
 				SubmitObjectData(&teapot);
-				//SubmitObjectData(&quad);
+				SubmitObjectData(&quad);
 				SubmitCameraData(&camera);
 				SubmitLightingData();
 			}

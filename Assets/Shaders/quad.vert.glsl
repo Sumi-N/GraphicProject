@@ -8,15 +8,13 @@ layout (std140, binding = 1) uniform const_drawcall
 {
 	mat4 model_position_matrix;
 	mat4 model_view_perspective_matrix;
-	mat3 model_inverse_transpose_matrix;
+	mat4 model_inverse_transpose_matrix;
 };
 
 out vec2 texcoord;
 
 void main()
 {
-	texcoord                   = model_texcoord;
-
-	// Send position data at perspective coordinate
-	gl_Position                = model_view_perspective_matrix * vec4(model_position, 1);
+	texcoord    = model_texcoord;
+	gl_Position = model_view_perspective_matrix * vec4(model_position, 1);
 }
