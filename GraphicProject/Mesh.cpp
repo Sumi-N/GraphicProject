@@ -86,7 +86,7 @@ void Mesh::Update()
 
 
 	model_pos_mat = translation_mat * rotation_mat * scale_mat;
-	model_vec_mat = glm::transpose(glm::inverse(glm::mat3(model_pos_mat)));
+	model_inverse_transpose_matrix = glm::transpose(glm::inverse(model_pos_mat));
 }
 
 void Mesh::Draw()

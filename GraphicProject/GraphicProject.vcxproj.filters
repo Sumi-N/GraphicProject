@@ -62,9 +62,6 @@
     <ClInclude Include="ConstantBuffer.h">
       <Filter>Header Files\GraphicsThread</Filter>
     </ClInclude>
-    <ClInclude Include="RenderTexture.h">
-      <Filter>Header Files\GraphicsThread</Filter>
-    </ClInclude>
     <ClInclude Include="Quad.h">
       <Filter>Header Files\GameThread</Filter>
     </ClInclude>
@@ -101,9 +98,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConstantBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Quad.cpp">

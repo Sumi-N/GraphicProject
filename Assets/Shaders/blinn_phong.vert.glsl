@@ -15,7 +15,7 @@ layout (std140, binding = 1) uniform const_object
 {
 	mat4 model_position_matrix;
 	mat4 model_view_perspective_matrix;
-	mat3 model_inverse_transpose_matrix;
+	mat4 model_inverse_transpose_matrix;
 };
 
 layout (std140, binding = 3) uniform const_light
@@ -39,7 +39,7 @@ void main()
 	// Send position data at perspective coordinate
 	gl_Position                = model_view_perspective_matrix * vec4(model_position, 1);
 	// Get normal vector at world coordinate
-	world_normal               = normalize(model_inverse_transpose_matrix * model_normal);
+	world_normal               = normalize(mat3(model_inverse_transpose_matrix) * model_normal);
 
 	world_pointlight_direction = normalize(vec3(light_point_position) - vec3(model_position_matrix * vec4(model_position, 1)));
 

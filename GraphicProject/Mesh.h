@@ -45,7 +45,7 @@ public:
 	glm::mat4 rotation_mat;
 
 	glm::mat4 model_pos_mat;
-	glm::mat3 model_vec_mat;
+	glm::mat4 model_inverse_transpose_matrix;
 
 	void Load(const char * filename);
 	void Init();

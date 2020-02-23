@@ -14,11 +14,17 @@ public:
 	GLuint targettexture;
 	GLuint targetdepth;
 
-	void Initialize(int width, int height);
+	GLsizei width;
+	GLsizei height;
+
+	void Init(int width, int height);
 };
 
-inline void FrameBuffer::Initialize(int width,int height)
+inline void FrameBuffer::Init(int width,int height)
 {
+	this->width = width;
+	this->height = height;
+
 	// Create frame buffer
 	glGenFramebuffers(1, &bufferid);
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferid);
@@ -56,6 +62,6 @@ inline void FrameBuffer::Initialize(int width,int height)
 	}
 
 	// Set back to original back buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);    //unbind framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

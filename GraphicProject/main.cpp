@@ -76,7 +76,7 @@ void SubmitObjectData(Object * obj)
 	BeginSubmittedByGameThread->objectlist.push_back(obj);
 
 	ConstantData::Object drawcall;
-	drawcall.model_inverse_transpose_matrix = obj->mesh->model_vec_mat;
+	drawcall.model_inverse_transpose_matrix = obj->mesh->model_inverse_transpose_matrix;
 	drawcall.model_position_matrix = obj->mesh->model_pos_mat;
 	BeginSubmittedByGameThread->drawcalllist.push_back(drawcall);
 
@@ -96,7 +96,7 @@ void SubmitLightingData()
 {
 	BeginSubmittedByGameThread->light.light_ambient_intensity = glm::vec4(ambientlight.intensity, 1.0);
 	BeginSubmittedByGameThread->light.light_point_intensity = glm::vec4(pointlight.intensity, 1.0);
-	BeginSubmittedByGameThread->light.pointposition = glm::vec4(pointlight.position, 1.0);
+	BeginSubmittedByGameThread->light.pointposition = glm::vec4(pointlight.position, 0.0);
 }
 
 void InitializeObject()
@@ -128,7 +128,7 @@ void InitializeObject()
 	// Setup Light
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
-	pointlight.position = glm::vec3(20, 20, -50);
+	pointlight.position = glm::vec3(0, 0, -20);
 
 	// Setting up environment map
 	cubemap.Initialize();
@@ -196,7 +196,7 @@ int InitializeRenderThread()
 	const_buffer_light.Init(ConstantData::Index::Light, ConstantData::Size::Light);
 
 	// Instantiate framebuffer
-	framebuffer.Initialize(WIDTH, HEIGHT);
+	framebuffer.Init(WIDTH, HEIGHT);
 }
 
 int main()
@@ -229,10 +229,11 @@ int main()
 		glfwPollEvents();
 
 		// Clear window
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Cube mapping
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		auto & const_data_frame = BeginRenderedByRenderThread->frame;
 		const_buffer_frame.Update(&const_data_frame);
 
@@ -248,7 +249,7 @@ int main()
 		glDepthMask(GL_TRUE);
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.bufferid);
-		{
+		{	
 			// Renderring part
 			{
 
@@ -278,7 +279,6 @@ int main()
 
 		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		//{
-		//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//	// Submit Camera Information
 		//	auto & const_data_frame = BeginRenderedByRenderThread->frame;
@@ -287,7 +287,7 @@ int main()
 		//	for (int i = 0; i < BeginRenderedByRenderThread->objectlist.size(); i++)
 		//	{
 		//		auto & const_data_draw = BeginRenderedByRenderThread->drawcalllist[i];
-		//		const_data_draw.mvp = const_data_frame.cvp * const_data_draw.mwt;
+		//		const_data_draw.model_view_perspective_matrix = const_data_frame.view_perspective_matrix * const_data_draw.model_position_matrix;
 		//		const_buffer_drawcall.Update(&const_data_draw);
 
 		//		glUseProgram(quad.mesh->material->programid);

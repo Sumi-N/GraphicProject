@@ -20,7 +20,7 @@ namespace ConstantData
 	{
 		glm::mat4 model_position_matrix;
 		glm::mat4 model_view_perspective_matrix;
-		glm::mat3 model_inverse_transpose_matrix;
+		glm::mat4 model_inverse_transpose_matrix;
 	};
 
 	struct Material 
