@@ -13,7 +13,6 @@ Event event_done_submitting_from_game;
 Event event_can_submit_from_game;
 
 std::mutex mutex;
-std::mutex mutex2;
 std::condition_variable condition_variable;
 
 GameThread gamethread;

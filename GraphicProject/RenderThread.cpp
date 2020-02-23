@@ -22,6 +22,10 @@
 #include "Input.h"
 
 //////////////////////Global Data
+extern GameThread gamethread;
+extern std::mutex mutex;
+extern std::condition_variable condition_variable;
+
 GLFWwindow * window;
 
 extern Camera camera;
@@ -35,56 +39,23 @@ ConstantBuffer buffer_camera;
 ConstantBuffer buffer_object;
 ConstantBuffer buffer_material;
 ConstantBuffer buffer_light;
-
 FrameBuffer framebuffer;
 
 DataGameToRender datagametorender[2];
 DataGameToRender * datagameown = &datagametorender[0];
 DataGameToRender * datarenderown = &datagametorender[1];
 
-DataRenderToGame dataRequiredForGameThread[2];
-DataRenderToGame * BeginSubmittedByRenderThread = &dataRequiredForGameThread[0];
-DataRenderToGame * BeginReadByGameThread = &dataRequiredForGameThread[1];
-
 extern Event event_done_submitting_from_game;
 extern Event event_can_submit_from_game;
 
-bool WaitUntilDataCanSubmitFromApplicationThread(const double i_timetowait)
+bool RenderThread::WaitUntilDataCanSubmitFromApplicationThread(const double i_timetowait)
 {
 	return WaitForEvent(event_can_submit_from_game, i_timetowait);
 }
 
-void SignalTheDataHasBeenSubmitted()
+void RenderThread::SignalTheDataHasBeenSubmitted()
 {
 	event_done_submitting_from_game.Signal();
-}
-
-void SubmitObjectData(Object * obj)
-{
-	datagameown->objectlist.push_back(obj);
-
-	ConstantData::Object drawcall;
-	drawcall.model_inverse_transpose_matrix = obj->mesh->model_inverse_transpose_matrix;
-	drawcall.model_position_matrix = obj->mesh->model_pos_mat;
-	datagameown->drawcalllist.push_back(drawcall);
-
-	ConstantData::Material material;
-	material.specular = glm::vec4(obj->mesh->material->Ks[0], obj->mesh->material->Ks[1], obj->mesh->material->Ks[2], obj->mesh->material->Ns);
-	material.diffuse = glm::vec4(obj->mesh->material->Kd[0], obj->mesh->material->Kd[1], obj->mesh->material->Kd[2], 1.0);
-	datagameown->materiallist.push_back(material);
-}
-
-void SubmitCameraData(Camera * camera)
-{
-	datagameown->frame.camera_position_vector = camera->pos;
-	datagameown->frame.view_perspective_matrix = camera->view_perspective_mat;
-}
-
-void SubmitLightingData()
-{
-	datagameown->light.light_ambient_intensity = glm::vec4(ambientlight.intensity, 1.0);
-	datagameown->light.light_point_intensity = glm::vec4(pointlight.intensity, 1.0);
-	datagameown->light.pointposition = glm::vec4(pointlight.position, 0.0);
 }
 
 void RenderThread::Init()
@@ -196,7 +167,8 @@ void RenderThread::Run()
 		if (result)
 		{
 			std::swap(datagameown, datarenderown);
-			std::swap(BeginReadByGameThread, BeginSubmittedByRenderThread);
+			gamethread.RenderToGameInfo();
+			
 			bool result = event_can_submit_from_game.Signal();
 		}
 
@@ -224,11 +196,11 @@ void RenderThread::Run()
 
 				for (int i = 0; i < datarenderown->objectlist.size(); i++)
 				{
-					auto & const_data_draw = datarenderown->drawcalllist[i];
+					auto & const_data_draw = datarenderown->const_mesh[i];
 					const_data_draw.model_view_perspective_matrix = const_data_frame.view_perspective_matrix * const_data_draw.model_position_matrix;
 					buffer_object.Update(&const_data_draw);
 
-					auto & const_data_material = datarenderown->materiallist[i];
+					auto & const_data_material = datarenderown->const_material[i];
 					buffer_material.Update(&const_data_material);
 
 					// Submit shader program and get texture uniform
@@ -261,7 +233,7 @@ void RenderThread::Run()
 
 			for (int i = 0; i < datarenderown->objectlist.size(); i++)
 			{
-				auto & const_data_draw = datarenderown->drawcalllist[i];
+				auto & const_data_draw = datarenderown->const_mesh[i];
 				const_data_draw.model_view_perspective_matrix = const_data_frame.view_perspective_matrix * const_data_draw.model_position_matrix;
 				buffer_object.Update(&const_data_draw);
 
@@ -274,7 +246,36 @@ void RenderThread::Run()
 
 		// Clean up
 		datarenderown->objectlist.clear();
-		datarenderown->drawcalllist.clear();
-		datarenderown->materiallist.clear();
+		datarenderown->const_mesh.clear();
+		datarenderown->const_material.clear();
 	}
+}
+
+
+void RenderThread::SubmitObjectData(Object * obj)
+{
+	datagameown->objectlist.push_back(obj);
+
+	ConstantData::Mesh mesh;
+	mesh.model_inverse_transpose_matrix = obj->mesh->model_inverse_transpose_matrix;
+	mesh.model_position_matrix = obj->mesh->model_pos_mat;
+	datagameown->const_mesh.push_back(mesh);
+
+	ConstantData::Material material;
+	material.specular = glm::vec4(obj->mesh->material->Ks[0], obj->mesh->material->Ks[1], obj->mesh->material->Ks[2], obj->mesh->material->Ns);
+	material.diffuse = glm::vec4(obj->mesh->material->Kd[0], obj->mesh->material->Kd[1], obj->mesh->material->Kd[2], 1.0);
+	datagameown->const_material.push_back(material);
+}
+
+void RenderThread::SubmitCameraData(Camera * camera)
+{
+	datagameown->frame.camera_position_vector = camera->pos;
+	datagameown->frame.view_perspective_matrix = camera->view_perspective_mat;
+}
+
+void RenderThread::SubmitLightingData()
+{
+	datagameown->light.light_ambient_intensity = glm::vec4(ambientlight.intensity, 1.0);
+	datagameown->light.light_point_intensity = glm::vec4(pointlight.intensity, 1.0);
+	datagameown->light.pointposition = glm::vec4(pointlight.position, 0.0);
 }
