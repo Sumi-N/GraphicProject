@@ -12,7 +12,6 @@
 #include "Light.h"
 #include "Quad.h"
 #include "CubeMap.h"
-#include "Event.h"
 #include "ConstantBuffer.h"
 
 // About threading
@@ -23,10 +22,18 @@
 
 //////////////////////Global Data
 extern GameThread gamethread;
-extern std::mutex mutex;
-extern std::condition_variable condition_variable;
+extern std::mutex mutex_render;
+extern std::mutex mutex_game;
+extern std::condition_variable cv_render;
+extern std::condition_variable cv_game;
+extern bool brenderready;
+extern bool bgameready;
 
 GLFWwindow * window;
+
+DataGameToRender datagametorender[2];
+DataGameToRender * datagameown = &datagametorender[0];
+DataGameToRender * datarenderown = &datagametorender[1];
 
 extern Camera camera;
 extern Object teapot;
@@ -40,23 +47,6 @@ ConstantBuffer buffer_object;
 ConstantBuffer buffer_material;
 ConstantBuffer buffer_light;
 FrameBuffer framebuffer;
-
-DataGameToRender datagametorender[2];
-DataGameToRender * datagameown = &datagametorender[0];
-DataGameToRender * datarenderown = &datagametorender[1];
-
-extern Event event_done_submitting_from_game;
-extern Event event_can_submit_from_game;
-
-bool RenderThread::WaitUntilDataCanSubmitFromApplicationThread(const double i_timetowait)
-{
-	return WaitForEvent(event_can_submit_from_game, i_timetowait);
-}
-
-void RenderThread::SignalTheDataHasBeenSubmitted()
-{
-	event_done_submitting_from_game.Signal();
-}
 
 void RenderThread::Init()
 {
@@ -161,24 +151,25 @@ void RenderThread::Init()
 
 void RenderThread::Run()
 {
+	
 	while (glfwWindowShouldClose(window) == GL_FALSE)
 	{
-		bool result = WaitForEvent(event_done_submitting_from_game, 100000);
-		if (result)
-		{
-			std::swap(datagameown, datarenderown);
-			gamethread.RenderToGameInfo();
-			
-			bool result = event_can_submit_from_game.Signal();
-		}
-
-		BeginSubmittedByRenderThread->up = false;
-		BeginSubmittedByRenderThread->down = false;
-		BeginSubmittedByRenderThread->right = false;
-		BeginSubmittedByRenderThread->left = false;
-
 		glfwPollEvents();
 
+		// Critiacal Section
+		{
+			std::lock_guard<std::mutex> lock_guard(mutex_render);
+			
+			{
+				std::swap(datagameown, datarenderown);
+				gamethread.RenderToGameInfo();
+			}
+
+			brenderready = true;
+			cv_render.notify_one();
+		}
+
+		Input::ClearInput();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.bufferid);
 		{
@@ -187,16 +178,16 @@ void RenderThread::Run()
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				// Submit Camera Information
-				auto & const_data_frame = datarenderown->frame;
+				auto & const_data_frame = datarenderown->const_frame;
 				buffer_camera.Update(&const_data_frame);
 
 				// Submit Light Information
-				auto & const_data_light = datarenderown->light;
+				auto & const_data_light = datarenderown->const_light;
 				buffer_light.Update(&const_data_light);
 
 				for (int i = 0; i < datarenderown->objectlist.size(); i++)
 				{
-					auto & const_data_draw = datarenderown->const_mesh[i];
+					auto & const_data_draw = datarenderown->const_model[i];
 					const_data_draw.model_view_perspective_matrix = const_data_frame.view_perspective_matrix * const_data_draw.model_position_matrix;
 					buffer_object.Update(&const_data_draw);
 
@@ -213,7 +204,7 @@ void RenderThread::Run()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			auto & const_data_frame = datarenderown->frame;
+			auto & const_data_frame = datarenderown->const_frame;
 			buffer_camera.Update(&const_data_frame);
 
 			glDepthMask(GL_FALSE);
@@ -228,12 +219,12 @@ void RenderThread::Run()
 
 		{
 			// Submit Camera Information
-			auto & const_data_frame = datarenderown->frame;
+			auto & const_data_frame = datarenderown->const_frame;
 			buffer_camera.Update(&const_data_frame);
 
 			for (int i = 0; i < datarenderown->objectlist.size(); i++)
 			{
-				auto & const_data_draw = datarenderown->const_mesh[i];
+				auto & const_data_draw = datarenderown->const_model[i];
 				const_data_draw.model_view_perspective_matrix = const_data_frame.view_perspective_matrix * const_data_draw.model_position_matrix;
 				buffer_object.Update(&const_data_draw);
 
@@ -246,20 +237,19 @@ void RenderThread::Run()
 
 		// Clean up
 		datarenderown->objectlist.clear();
-		datarenderown->const_mesh.clear();
+		datarenderown->const_model.clear();
 		datarenderown->const_material.clear();
 	}
 }
-
 
 void RenderThread::SubmitObjectData(Object * obj)
 {
 	datagameown->objectlist.push_back(obj);
 
-	ConstantData::Mesh mesh;
+	ConstantData::Model mesh;
 	mesh.model_inverse_transpose_matrix = obj->mesh->model_inverse_transpose_matrix;
 	mesh.model_position_matrix = obj->mesh->model_pos_mat;
-	datagameown->const_mesh.push_back(mesh);
+	datagameown->const_model.push_back(mesh);
 
 	ConstantData::Material material;
 	material.specular = glm::vec4(obj->mesh->material->Ks[0], obj->mesh->material->Ks[1], obj->mesh->material->Ks[2], obj->mesh->material->Ns);
@@ -269,13 +259,13 @@ void RenderThread::SubmitObjectData(Object * obj)
 
 void RenderThread::SubmitCameraData(Camera * camera)
 {
-	datagameown->frame.camera_position_vector = camera->pos;
-	datagameown->frame.view_perspective_matrix = camera->view_perspective_mat;
+	datagameown->const_frame.camera_position_vector = camera->pos;
+	datagameown->const_frame.view_perspective_matrix = camera->view_perspective_mat;
 }
 
 void RenderThread::SubmitLightingData()
 {
-	datagameown->light.light_ambient_intensity = glm::vec4(ambientlight.intensity, 1.0);
-	datagameown->light.light_point_intensity = glm::vec4(pointlight.intensity, 1.0);
-	datagameown->light.pointposition = glm::vec4(pointlight.position, 0.0);
+	datagameown->const_light.light_ambient_intensity = glm::vec4(ambientlight.intensity, 1.0);
+	datagameown->const_light.light_point_intensity = glm::vec4(pointlight.intensity, 1.0);
+	datagameown->const_light.pointposition = glm::vec4(pointlight.position, 0.0);
 }

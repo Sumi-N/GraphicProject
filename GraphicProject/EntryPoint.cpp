@@ -6,14 +6,14 @@
 
 #include "RenderThread.h"
 #include "GameThread.h"
-#include "Event.h"
 
 // Those are the events to signal another thread that something is done
-Event event_done_submitting_from_game;
-Event event_can_submit_from_game;
-
-std::mutex mutex;
-std::condition_variable condition_variable;
+std::mutex mutex_game;
+std::mutex mutex_render;
+std::condition_variable cv_game;
+std::condition_variable cv_render;
+bool brenderready = false;
+bool bgameready = false;
 
 GameThread gamethread;
 RenderThread renderthread;
@@ -21,14 +21,17 @@ RenderThread renderthread;
 int main2()
 {
 	{
-		std::unique_lock<std::mutex> unique_lock_guard(mutex);
-		condition_variable.wait(unique_lock_guard);
+		std::unique_lock<std::mutex> unique_lock_guard(mutex_render);
+		while(!brenderready)
+			cv_render.wait(unique_lock_guard);
+		brenderready = false;
 	}
 
 	{
-		std::lock_guard<std::mutex> lock_guard(mutex);
+		std::lock_guard<std::mutex> lock_guard(mutex_game);
 		gamethread.Init();
-		condition_variable.notify_one();
+		bgameready = true;
+		cv_game.notify_one();
 	}
 
 	gamethread.Run();
@@ -37,24 +40,23 @@ int main2()
 
 int main()
 {
-
-	event_done_submitting_from_game.Init(EventType::ResetAutomatically);
-	event_can_submit_from_game.Init(EventType::ResetAutomatically, EventState::Signaled);
-
 	// Start game thread
 	std::thread gamethread(main2);
 
 	// Start render thread
 	{
 		{
-			std::lock_guard<std::mutex> lock_guard(mutex);
+			std::lock_guard<std::mutex> lock_guard(mutex_render);
 			renderthread.Init();
-			condition_variable.notify_one();
+			brenderready = true;
+			cv_render.notify_one();
 		}
 
 		{
-			std::unique_lock<std::mutex> unique_lock_guard(mutex);
-			condition_variable.wait(unique_lock_guard);
+			std::unique_lock<std::mutex> unique_lock_guard(mutex_game);
+			while(!bgameready)
+				cv_game.wait(unique_lock_guard);
+			bgameready = false;
 		}
 
 		renderthread.Run();

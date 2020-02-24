@@ -8,6 +8,10 @@ struct DataRenderToGame
 	bool left = false;
 	bool up = false;
 	bool down = false;
+	bool space = false;
+
+	float rotationratex;
+	float rotationratey;
 };
 
 class GameThread

@@ -11,12 +11,16 @@
 #include "Light.h"
 
 extern RenderThread renderthread;
-extern std::mutex mutex;
-extern std::condition_variable condition_variable;
+extern std::mutex mutex_game;
+extern std::mutex mutex_render;
+extern std::condition_variable cv_game;
+extern std::condition_variable cv_render;
+extern bool brenderready;
+extern bool bgameready;
 
-DataRenderToGame dataRequiredForGameThread[2];
-DataRenderToGame * BeginSubmittedByRenderThread = &dataRequiredForGameThread[0];
-DataRenderToGame * BeginReadByGameThread = &dataRequiredForGameThread[1];
+DataRenderToGame datarendertogame[2];
+DataRenderToGame * BeginSubmittedByRenderThread = &datarendertogame[0];
+DataRenderToGame * BeginReadByGameThread = &datarendertogame[1];
 
 Camera camera;
 Object teapot;
@@ -48,20 +52,43 @@ void GameThread::Run()
 		{
 			camera.MoveCamera(0.01f, camera.forwardvec);
 		}
-
 		if (BeginReadByGameThread->down)
 		{
 			camera.MoveCamera(-0.01f, camera.forwardvec);
 		}
-
 		if (BeginReadByGameThread->left)
 		{
 			camera.MoveCamera(-0.01f, camera.rightvec);
 		}
-
 		if (BeginReadByGameThread->right)
 		{
 			camera.MoveCamera(0.01f, camera.rightvec);
+		}
+		if (BeginReadByGameThread->space)
+		{
+			glm::vec3 zero = glm::vec3(0, 0, 0);
+			camera.MoveCamera(0, zero);
+		}
+
+		glm::vec3 up = glm::vec3(0, 1, 0);
+		glm::vec3 right = camera.rightvec;
+
+		if (BeginReadByGameThread->rotationratex > 0)
+		{
+			camera.RotateAround(1, up);
+		}
+		else if (BeginReadByGameThread->rotationratex < 0)
+		{
+			camera.RotateAround(-1, up);
+		}
+
+		if (BeginReadByGameThread->rotationratey > 0)
+		{
+			camera.RotateAround(1, right);
+		}
+		else if (BeginReadByGameThread->rotationratey < 0)
+		{
+			camera.RotateAround(-1, right);
 		}
 
 		timer.Run();
@@ -69,22 +96,20 @@ void GameThread::Run()
 		quad.mesh->Update();
 		camera.Update(timer.time.dt);
 
-		// Check if render thread is ready to get date from game thread
-		bool canSubmitDataToRenderThread;
-		do
 		{
-			canSubmitDataToRenderThread = renderthread.WaitUntilDataCanSubmitFromApplicationThread(250);
-		} while (!canSubmitDataToRenderThread);
+			std::unique_lock<std::mutex> unique_lock_guard(mutex_render);
+			while (!brenderready)
+				cv_render.wait(unique_lock_guard);
 
-		{
-			// Submit data in this scope
-			renderthread.SubmitObjectData(&teapot);
-			renderthread.SubmitObjectData(&quad);
-			renderthread.SubmitCameraData(&camera);
-			renderthread.SubmitLightingData();
+			{
+				// Submit data in this scope
+				renderthread.SubmitObjectData(&teapot);
+				renderthread.SubmitObjectData(&quad);
+				renderthread.SubmitCameraData(&camera);
+				renderthread.SubmitLightingData();
+			}
+			brenderready = false;
 		}
-
-		renderthread.SignalTheDataHasBeenSubmitted();
 	}
 }
 

@@ -4,7 +4,6 @@
 #include <GLFW/glfw3.h>
 
 extern GLFWwindow * window;
-extern Camera camera;
 extern GLuint program;
 extern DataRenderToGame * BeginSubmittedByRenderThread;
 
@@ -27,15 +26,15 @@ namespace Input {
 
 	void keyCallback(GLFWwindow * window, int key, int scancode, int action, int mods) 
 	{
-		glm::vec3 zero = glm::vec3(0, 0, 0);
-		camera.MoveCamera(0, zero);
-
-		glm::vec3 up = camera.forwardvec;
-		glm::vec3 right = camera.rightvec;
 
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
 			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+
+		if (key == GLFW_KEY_SPACE && (action == GLFW_PRESS || action == GLFW_REPEAT))
+		{
+			BeginSubmittedByRenderThread->space = true;
 		}
 
 		if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
@@ -93,33 +92,27 @@ namespace Input {
 		mousestate.xpos = xpos;
 		mousestate.ypos = ypos;
 
-		glm::vec3 up = glm::vec3(0, 1, 0);
-		glm::vec3 right = camera.rightvec;
-
 		if (mousestate.isRightButtonPressing)
 		{
 			float rotationratex = (float)(mousestate.xpos - mousestate.oldxpos);
 			float rotationratey = (float)(mousestate.ypos - mousestate.oldypos);
 
-			if (rotationratex > 0)
-			{
-				camera.RotateAround(1, up);
-			}			
-			else if (rotationratex < 0)
-			{
-				camera.RotateAround(-1, up);
-			}
-
-			if (rotationratey > 0)
-			{
-				camera.RotateAround(1, right);
-			}
-			else if (rotationratey < 0)
-			{
-				camera.RotateAround(-1, right);
-			}
+			BeginSubmittedByRenderThread->rotationratex = rotationratex;
+			BeginSubmittedByRenderThread->rotationratey = rotationratey;
 		}
 
 		return;
+	}
+
+	void ClearInput()
+	{
+		BeginSubmittedByRenderThread->up = false;
+		BeginSubmittedByRenderThread->down = false;
+		BeginSubmittedByRenderThread->right = false;
+		BeginSubmittedByRenderThread->left = false;
+		BeginSubmittedByRenderThread->space = false;
+
+		BeginSubmittedByRenderThread->rotationratex = 0;
+		BeginSubmittedByRenderThread->rotationratey = 0;
 	}
 }

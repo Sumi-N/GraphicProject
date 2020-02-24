@@ -16,7 +16,7 @@ namespace ConstantData
 		float padding;
 	};
 
-	struct Mesh 
+	struct Model 
 	{
 		glm::mat4 model_position_matrix;
 		glm::mat4 model_view_perspective_matrix;
@@ -49,7 +49,7 @@ namespace ConstantData
 	enum class Size : uint8_t
 	{
 		Camera = sizeof(ConstantData::Camera),
-		Object   = sizeof(ConstantData::Mesh),
+		Object   = sizeof(ConstantData::Model),
 		Material = sizeof(ConstantData::Material),
 		Light    = sizeof(ConstantData::Light),
 	};

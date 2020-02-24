@@ -6,10 +6,10 @@
 
 struct DataGameToRender
 {
-	ConstantData::Camera frame;
-	ConstantData::Light light;
-	std::vector<ConstantData::Mesh> const_mesh;
+	ConstantData::Camera const_frame;
+	std::vector<ConstantData::Model> const_model;
 	std::vector<ConstantData::Material> const_material;
+	ConstantData::Light const_light;
 	std::vector<Object *> objectlist;
 };
 
@@ -19,11 +19,7 @@ public:
 	void Init();
 	void Run();
 
-	bool WaitUntilDataCanSubmitFromApplicationThread(const double i_timetowait);
-
-void SignalTheDataHasBeenSubmitted();
-
-void SubmitObjectData(Object * obj);
-void SubmitCameraData(Camera * camera);
-void SubmitLightingData();
+	void SubmitObjectData(Object * obj);
+	void SubmitCameraData(Camera * camera);
+	void SubmitLightingData();
 };

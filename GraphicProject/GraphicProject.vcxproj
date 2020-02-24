@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
-    <ClCompile Include="Event.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="GameThread.cpp" />
     <ClCompile Include="lodepng.cpp" />
@@ -37,7 +36,6 @@
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="Constatnt.h" />
     <ClInclude Include="CubeMap.h" />
-    <ClInclude Include="Event.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GameThread.h" />
     <ClInclude Include="Input.h" />
