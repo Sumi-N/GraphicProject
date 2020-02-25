@@ -20,9 +20,9 @@ void FrameBuffer::Init(int width, int height)
 	glGenFramebuffers(1, &bufferid);
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferid);
 
-	// Create texture for color
+	// Create color buffer
 	color.CreateTexture(GL_RGBA, width, height);
-	// Create texture for depth
+	// Create depth buffer
 	depth.CreateTexture(GL_DEPTH_COMPONENT, width, height);
 
 	// bind textures to framebuffer

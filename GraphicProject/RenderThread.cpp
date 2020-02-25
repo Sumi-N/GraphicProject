@@ -5,6 +5,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Constatnt.h"
 #include "Utility.h"
@@ -101,6 +102,7 @@ void RenderThread::Init()
 
 	// Set up culling
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);
 
@@ -173,64 +175,66 @@ void RenderThread::Run()
 
 		Input::ClearInput();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.bufferid);
-		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.bufferid);
+		//{
+		//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-			// Rendering Background
-			{
-				glDepthMask(GL_FALSE);
-				auto & const_data_frame = datarenderown->const_camera;
-				buffer_camera.Update(&const_data_frame);
-				cubemap.mesh->material->BindShader();
-				GLint vp_location = glGetUniformLocation(cubemap.mesh->material->programid, "view_perspective_matrix");
-				glm::mat4 pos = const_data_frame.perspective_matrix * glm::mat4(glm::mat3(const_data_frame.view_matrix));
-				glUniformMatrix4fv(vp_location, 1, GL_FALSE, &pos[0][0]);
-				cubemap.mesh->Draw();
-				glDepthMask(GL_TRUE);
-			}
+		//	// Rendering Background
+		//	{
+		//		glDepthMask(GL_FALSE);
+		//		auto & const_data_frame = datarenderown->const_camera;
+		//		buffer_camera.Update(&const_data_frame);
+		//		cubemap.mesh->material->BindShader();
+		//		GLint vp_location = glGetUniformLocation(cubemap.mesh->material->programid, "view_perspective_matrix");
+		//		glm::mat4 pos = const_data_frame.perspective_matrix * glm::mat4(glm::mat3(const_data_frame.view_matrix)) * glm::mat4(glm::mat3(datarenderown->const_image.mirror_matrix));
+		//		glUniformMatrix4fv(vp_location, 1, GL_FALSE, &pos[0][0]);
+		//		cubemap.mesh->Draw();
+		//		glDepthMask(GL_TRUE);
+		//	}
 
-			{
-				// Submit Camera Information
-				auto & const_data_camera = datarenderown->const_camera;
-				buffer_camera.Update(&const_data_camera);
+		//	{
+		//		// Submit Camera Information
+		//		auto & const_data_camera = datarenderown->const_camera;
+		//		buffer_camera.Update(&const_data_camera);
 
-				// Submit Light Information
-				auto & const_data_light = datarenderown->const_light;
-				buffer_light.Update(&const_data_light);
+		//		// Submit Light Information
+		//		auto & const_data_light = datarenderown->const_light;
+		//		buffer_light.Update(&const_data_light);
 
-				for (int i = 0; i < datarenderown->objectlist.size(); i++)
-				{
-					auto & const_data_draw = datarenderown->const_model[i];
-					const_data_draw.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * const_data_draw.model_position_matrix;
-					buffer_mesh.Update(&const_data_draw);
+		//		for (int i = 0; i < datarenderown->objectlist.size(); i++)
+		//		{
+		//			auto & const_data_draw = datarenderown->const_model[i];
 
-					auto & const_data_material = datarenderown->const_material[i];
-					buffer_material.Update(&const_data_material);
+		//			// Instead of getting mvp, gets mirror image
+		//			const_data_draw.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * datarenderown->const_image.mirror_matrix * const_data_draw.model_position_matrix;
+		//			buffer_mesh.Update(&const_data_draw);
 
-					///////////////////////////////////////////////
-					// Submit shader program and get texture uniform
-					datarenderown->objectlist[i]->mesh->material->BindShader();
+		//			auto & const_data_material = datarenderown->const_material[i];
+		//			buffer_material.Update(&const_data_material);
 
-					GLint uniformid = glGetUniformLocation(datarenderown->objectlist[i]->mesh->material->programid, "skybox");
-					if (uniformid == -1)
-					{
-						//std::cerr << "The skybox2 variable doesn't exist in the shader file" << std::endl;
-					}
-					Texture * cubetexture = cubemap.GetCubeMapTexture();
-					glActiveTexture(GL_TEXTURE0 + cubetexture->unitnumber);
-					glBindTexture(GL_TEXTURE_2D, cubetexture->textureid);
-					glUniform1i(uniformid, cubetexture->unitnumber);
-					////////////////////////////////////////////////
+		//			///////////////////////////////////////////////
+		//			// Submit shader program and get texture uniform
+		//			datarenderown->objectlist[i]->mesh->material->BindShader();
 
-					datarenderown->objectlist[i]->mesh->Draw();
-				}
-			}
-		}
+		//			GLint uniformid = glGetUniformLocation(datarenderown->objectlist[i]->mesh->material->programid, "skybox");
+		//			if (uniformid == -1)
+		//			{
+		//				//std::cerr << "The skybox2 variable doesn't exist in the shader file" << std::endl;
+		//			}
+		//			Texture * cubetexture = cubemap.GetCubeMapTexture();
+		//			glActiveTexture(GL_TEXTURE0 + cubetexture->unitnumber);
+		//			glBindTexture(GL_TEXTURE_2D, cubetexture->textureid);
+		//			glUniform1i(uniformid, cubetexture->unitnumber);
+		//			////////////////////////////////////////////////
+
+		//			datarenderown->objectlist[i]->mesh->Draw();
+		//		}
+		//	}
+		//}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			// Rendering Background
 			{
@@ -276,6 +280,7 @@ void RenderThread::Run()
 					Texture * cubetexture = cubemap.GetCubeMapTexture();
 					glActiveTexture(GL_TEXTURE0 + cubetexture->unitnumber);
 					glBindTexture(GL_TEXTURE_2D, cubetexture->textureid);
+
 					glUniform1i(uniformid, cubetexture->unitnumber);
 					////////////////////////////////////////////////
 
@@ -296,9 +301,72 @@ void RenderThread::Run()
 
 					// This part need to change later
 					quad.Bind(framebuffer);
+
+					glEnable(GL_STENCIL_TEST);
+					glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
+					glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+					glStencilMask(0xFF); // Write to stencil buffer
+					glDepthMask(GL_FALSE);
+					glClear(GL_STENCIL_BUFFER_BIT);
 					quad.mesh->Draw();
+					glStencilFunc(GL_EQUAL, 1, 0xFF); // Pass test if stencil value is 1
+					glStencilMask(0x00); // Don't write anything to stencil buffer
+					glDepthMask(GL_TRUE); // Write to depth buffer
 				}
 			}
+
+			// Rendering Background
+			{
+				glDepthMask(GL_FALSE);
+				auto & const_data_frame = datarenderown->const_camera;
+				buffer_camera.Update(&const_data_frame);
+				cubemap.mesh->material->BindShader();
+				GLint vp_location = glGetUniformLocation(cubemap.mesh->material->programid, "view_perspective_matrix");
+				glm::mat4 pos = const_data_frame.perspective_matrix * glm::mat4(glm::mat3(const_data_frame.view_matrix)) * glm::mat4(glm::mat3(datarenderown->const_image.mirror_matrix));
+				glUniformMatrix4fv(vp_location, 1, GL_FALSE, &pos[0][0]);
+				cubemap.mesh->Draw();
+				glDepthMask(GL_TRUE);
+			}
+
+			// Rendering Objects
+			{
+				// Submit Camera Information
+				auto & const_data_camera = datarenderown->const_camera;
+				buffer_camera.Update(&const_data_camera);
+
+				// Submit Light Information
+				auto & const_data_light = datarenderown->const_light;
+				buffer_light.Update(&const_data_light);
+
+				for (int i = 0; i < datarenderown->objectlist.size(); i++)
+				{
+					auto & const_data_draw = datarenderown->const_model[i];
+					const_data_draw.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * datarenderown->const_image.mirror_matrix * const_data_draw.model_position_matrix;
+					buffer_mesh.Update(&const_data_draw);
+
+					auto & const_data_material = datarenderown->const_material[i];
+					buffer_material.Update(&const_data_material);
+
+					///////////////////////////////////////////////
+					// Submit shader program and get texture uniform
+					datarenderown->objectlist[i]->mesh->material->BindShader();
+
+					GLint uniformid = glGetUniformLocation(datarenderown->objectlist[i]->mesh->material->programid, "skybox");
+					if (uniformid == -1)
+					{
+						//std::cerr << "The skybox2 variable doesn't exist in the shader file" << std::endl;
+					}
+					Texture * cubetexture = cubemap.GetCubeMapTexture();
+					glActiveTexture(GL_TEXTURE0 + cubetexture->unitnumber);
+					glBindTexture(GL_TEXTURE_2D, cubetexture->textureid);
+
+					glUniform1i(uniformid, cubetexture->unitnumber);
+					////////////////////////////////////////////////
+
+					datarenderown->objectlist[i]->mesh->Draw();
+				}
+			}
+			glDisable(GL_STENCIL_TEST);
 		}
 
 		glfwSwapBuffers(window);
@@ -338,6 +406,17 @@ void RenderThread::SubmitImageData(Object * image)
 	material.specular = glm::vec4(image->mesh->material->Ks[0], image->mesh->material->Ks[1], image->mesh->material->Ks[2], image->mesh->material->Ns);
 	material.diffuse = glm::vec4(image->mesh->material->Kd[0], image->mesh->material->Kd[1], image->mesh->material->Kd[2], 1.0);
 	datagameown->const_image_material.push_back(material);
+
+	glm::vec3 p = glm::normalize(glm::mat3(image->mesh->model_pos_mat) * glm::vec3(0, 0, 1));
+	float mirror_floats[16] =
+	{
+		1 - 2 * p.x * p.x, -2 * p.y * p.x, -2 * p.z * p.x, 0.0,
+		-2 * p.x * p.y, 1 - 2 * p.y * p.y, -2 * p.z * p.y, 0.0,
+		-2 * p.x * p.z, -2 * p.y * p.z, 1 - 2 * p.z * p.z, 0.0,
+		-2 * p.x * 7, -2 * p.y * 7, -2 * p.z * 7, 1.0,
+	};
+	glm::mat4 mirror_mat = glm::make_mat4(mirror_floats);
+	datagameown->const_image.mirror_matrix = mirror_mat;
 }
 
 void RenderThread::SubmitCameraData(Camera * camera)

@@ -39,8 +39,7 @@ namespace ConstantData
 
 	struct Image
 	{
-		glm::mat4 model_position_matrix;
-		glm::mat4 model_view_perspective_matrix;
+		glm::mat4 mirror_matrix;
 	};
 
 	/////////////////// Don't forget to add index and size data after addding a new uniform data //////////////
