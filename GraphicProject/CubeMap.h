@@ -8,6 +8,7 @@ class CubeMap : public Object
 {
 public:
 	void Init();
+	Texture* GetCubeMapTexture();
 };
 
 inline void CubeMap::Init()
@@ -28,5 +29,10 @@ inline void CubeMap::Init()
 	filenames[4] = "../Assets/Textures/cubemap_posz.png";
 	filenames[5] = "../Assets/Textures/cubemap_negz.png";
 
-	mesh->material->LoadCubeMapTexture(filenames);
+	mesh->material->LoadCubeMapTexture(filenames, 3);
+}
+
+inline Texture* CubeMap::GetCubeMapTexture()
+{
+	return &mesh->material->texturelist[0];
 }

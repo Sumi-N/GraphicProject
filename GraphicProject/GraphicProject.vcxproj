@@ -27,7 +27,6 @@
     <ClCompile Include="RenderThread.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Quad.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>

@@ -10,7 +10,8 @@ namespace ConstantData
 {
 	struct Camera 
 	{
-		glm::mat4 view_perspective_matrix;
+		glm::mat4 view_matrix;
+		glm::mat4 perspective_matrix;
 		glm::vec3 camera_position_vector;
 
 		float padding;
@@ -36,6 +37,12 @@ namespace ConstantData
 		glm::vec4 pointposition;
 	};
 
+	struct Image
+	{
+		glm::mat4 model_position_matrix;
+		glm::mat4 model_view_perspective_matrix;
+	};
+
 	/////////////////// Don't forget to add index and size data after addding a new uniform data //////////////
 
 	enum class Index : uint8_t
@@ -44,6 +51,7 @@ namespace ConstantData
 		Object   = 1,
 		Material = 2,
 		Light    = 3,
+		Image    = 4,
 	};
 
 	enum class Size : uint8_t
@@ -52,6 +60,7 @@ namespace ConstantData
 		Object   = sizeof(ConstantData::Model),
 		Material = sizeof(ConstantData::Material),
 		Light    = sizeof(ConstantData::Light),
+		Image = sizeof(ConstantData::Image),
 	};
 }
 

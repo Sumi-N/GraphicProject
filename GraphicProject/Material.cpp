@@ -92,10 +92,10 @@ void Material::LoadTexture(const char * filename)
 	texturelist.push_back(texture);
 }
 
-void Material::LoadCubeMapTexture(const char ** filenames)
+void Material::LoadCubeMapTexture(const char ** filenames, int unitnum)
 {
 	Texture cubemap;
-	cubemap.InitCubeMap(0, programid, filenames);
+	cubemap.InitCubeMap(unitnum, programid, filenames);
 	texturelist.push_back(cubemap);
 }
 

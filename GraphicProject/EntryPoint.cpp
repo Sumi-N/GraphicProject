@@ -40,10 +40,8 @@ int main2()
 
 int main()
 {
-	// Start game thread
 	std::thread gamethread(main2);
 
-	// Start render thread
 	{
 		{
 			std::lock_guard<std::mutex> lock_guard(mutex_render);

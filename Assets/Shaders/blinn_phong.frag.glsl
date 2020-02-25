@@ -17,6 +17,7 @@ layout (std140, binding = 3) uniform const_light
 
 uniform sampler2D texture0;
 uniform sampler2D texture1;
+uniform samplerCube skybox;
 
 // Normal vector of the object at world coordinate
 in vec3 world_normal;
@@ -36,13 +37,15 @@ void main()
 	
 	if (cos_theta_1 > 0)
 	{
-		color += texture2D(texture0, texcoord.st) * cos_theta_1 * diffuse * light_point_intensity;
+		color += texture2D(texture0, texcoord.st)  * cos_theta_1 * diffuse * light_point_intensity;
 	
 		vec3 h = normalize(world_object_direction + world_pointlight_direction);
 
 		if (dot(h, world_normal) > 0)
 		{
-			color +=  texture2D(texture1, texcoord.st) * vec4(vec3(light_point_intensity) * vec3(specular) * pow(dot(h, world_normal), specular.w), 1.0);
+			vec3 reflection = -1 * world_object_direction + 2 * dot(world_object_direction, world_normal) * world_normal;
+
+			color +=  (texture2D(texture1, texcoord.st) + texture(skybox, reflection)) * vec4(vec3(light_point_intensity) * vec3(specular) * pow(dot(h, world_normal), specular.w), 1.0);
 		}
 	}
 }

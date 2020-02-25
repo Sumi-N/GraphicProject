@@ -6,7 +6,8 @@ layout (location = 2) in vec2 model_texcoord;
 
 layout (std140, binding = 0) uniform const_camera
 {
-	mat4 view_perspective_matrix;
+	mat4 view_matrix;
+	mat4 perspective_matrix;
 	vec3 camera_position_vector;
 	float padding;
 };
@@ -37,7 +38,7 @@ out vec2 texcoord;
 void main()
 {
 	// Send position data at perspective coordinate
-	gl_Position                = model_view_perspective_matrix * vec4(model_position, 1);
+	gl_Position                = model_view_perspective_matrix * vec4(model_position, 1.0);
 	// Get normal vector at world coordinate
 	world_normal               = normalize(mat3(model_inverse_transpose_matrix) * model_normal);
 
