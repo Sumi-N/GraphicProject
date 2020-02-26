@@ -5,7 +5,6 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "Constatnt.h"
 #include "Utility.h"
@@ -407,16 +406,8 @@ void RenderThread::SubmitImageData(Object * image)
 	material.diffuse = glm::vec4(image->mesh->material->Kd[0], image->mesh->material->Kd[1], image->mesh->material->Kd[2], 1.0);
 	datagameown->const_image_material.push_back(material);
 
-	glm::vec3 p = glm::normalize(glm::mat3(image->mesh->model_pos_mat) * glm::vec3(0, 0, 1));
-	float mirror_floats[16] =
-	{
-		1 - 2 * p.x * p.x, -2 * p.y * p.x, -2 * p.z * p.x, 0.0,
-		-2 * p.x * p.y, 1 - 2 * p.y * p.y, -2 * p.z * p.y, 0.0,
-		-2 * p.x * p.z, -2 * p.y * p.z, 1 - 2 * p.z * p.z, 0.0,
-		-2 * p.x * 7, -2 * p.y * 7, -2 * p.z * 7, 1.0,
-	};
-	glm::mat4 mirror_mat = glm::make_mat4(mirror_floats);
-	datagameown->const_image.mirror_matrix = mirror_mat;
+	Quad* quad = static_cast<Quad *>(image);
+	datagameown->const_image.mirror_matrix = quad->mirror_inverse_mat;
 }
 
 void RenderThread::SubmitCameraData(Camera * camera)

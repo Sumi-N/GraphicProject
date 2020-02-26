@@ -31,18 +31,27 @@ public:
 		angacc   = glm::vec3(0.0, 0.0, 0.0);
 	}
 
-	void Translate(glm::vec3 pos)
-	{
-		this->pos = pos;
-	}
+	void Translate(glm::vec3 pos);
 
-	void SetMesh(Mesh * mesh)
+	void SetMesh(Mesh * mesh);
+
+	virtual void Update(float dt)
 	{
 		if (mesh)
 		{
-			this->mesh = mesh;
-			mesh->owner = this;
+			mesh->Update();
 		}
 	}
 };
+
+inline void Object::Translate(glm::vec3 pos) {this->pos = pos;}
+
+inline void Object::SetMesh(Mesh * mesh)
+{
+	if (mesh)
+	{
+		this->mesh = mesh;
+		mesh->owner = this;
+	}
+}
 

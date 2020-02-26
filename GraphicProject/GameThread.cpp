@@ -92,8 +92,8 @@ void GameThread::Run()
 		}
 
 		timer.Run();
-		teapot.mesh->Update();
-		quad.mesh->Update();
+		teapot.Update(timer.time.dt);
+		quad.Update(timer.time.dt);
 		camera.Update(timer.time.dt);
 
 		{
