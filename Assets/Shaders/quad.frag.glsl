@@ -4,9 +4,10 @@ layout(location = 0) out vec4 color;
 
 uniform sampler2D texture0;
 
-in vec2 texcoord;
+in vec4 clipcoord;
 
 void main()
 {
-	color = texture(texture0, texcoord.st) + vec4(0.1, 0.1, 0.1, 0);
+	vec2 normalizedDeviceCoordinate = (clipcoord.xy/clipcoord.w)*0.5 + 0.5;
+	color = texture(texture0, normalizedDeviceCoordinate);
 }

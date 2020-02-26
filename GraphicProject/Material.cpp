@@ -6,6 +6,7 @@
 
 #include "Material.h"
 #include "Texture.h"
+#include "CubeMap.h"
 #include "lodepng.h"
 #include "Utility.h"
 
@@ -66,9 +67,25 @@ void Material::LoadShader(const char * vert, const char * frag)
 
 	if (Utility::printProgramInfoLog(programid))
 	{
-		printf("suceed the shader compiling process\n");
+		//printf("suceed the shader compiling process\n");
 	}
 	//glDeleteProgram(programid);
+
+
+	// Get uniform cubemap texture skybox
+	uniformid_skybox = glGetUniformLocation(programid, "skybox");
+	if (uniformid_skybox == -1)
+	{
+		std::cerr << "The skybox variable doesn't exist in the shader file" << std::endl;
+	}
+}
+
+void Material::BindSkyBox(CubeMap cubemap)
+{
+	Texture * cubetexture = cubemap.GetCubeMapTexture();
+	glActiveTexture(GL_TEXTURE0 + cubetexture->unitnumber);
+	glBindTexture(GL_TEXTURE_2D, cubetexture->textureid);
+	glUniform1i(uniformid_skybox, cubetexture->unitnumber);
 }
 
 void Material::BindShader()

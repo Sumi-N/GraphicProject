@@ -8,7 +8,11 @@ class CubeMap : public Object
 {
 public:
 	void Init();
+	void Bind();
+
 	Texture* GetCubeMapTexture();
+	GLint uniformid_vp_matrix;
+	glm::mat4 vp;
 };
 
 inline void CubeMap::Init()
@@ -19,7 +23,7 @@ inline void CubeMap::Init()
 	mesh->Init();
 
 	mesh->material = new Material();
-	mesh->material->LoadShader("../Assets/Shaders/environmentmap.vert.glsl", "../Assets/Shaders/environmentmap.frag.glsl");
+	mesh->material->LoadShader("../Assets/Shaders/skybox.vert.glsl", "../Assets/Shaders/skybox.frag.glsl");
 
 	const char ** filenames = new const char*[6];
 	filenames[0] = "../Assets/Textures/cubemap_posx.png";
@@ -30,9 +34,17 @@ inline void CubeMap::Init()
 	filenames[5] = "../Assets/Textures/cubemap_negz.png";
 
 	mesh->material->LoadCubeMapTexture(filenames, 3);
+
+	uniformid_vp_matrix = glGetUniformLocation(mesh->material->programid, "view_perspective_matrix");
 }
 
 inline Texture* CubeMap::GetCubeMapTexture()
 {
 	return &mesh->material->texturelist[0];
+}
+
+inline void CubeMap::Bind()
+{
+	mesh->material->BindShader();
+	glUniformMatrix4fv(uniformid_vp_matrix, 1, GL_FALSE, &vp[0][0]);
 }

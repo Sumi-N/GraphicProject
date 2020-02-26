@@ -42,6 +42,7 @@ void GameThread::Init()
 {
 	// Initialize timer
 	timer.Init();
+	renderthread.SubmitCubeMapData(&cubemap);
 }
 
 void GameThread::Run()

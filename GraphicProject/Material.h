@@ -3,7 +3,6 @@
 #include <GL/glew.h>
 #include <vector>
 #include <string>
-#include "cyCodeBase/cyColor.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Texture.h"
@@ -19,9 +18,11 @@ public:
 	// Functions for openGL
 public:
 	GLuint programid = 0;
+	GLuint uniformid_skybox;
 	std::vector<Texture> texturelist;
 
 	void LoadShader(const char * vert, const char * frag);
+	void BindSkyBox(class CubeMap);
 	void BindShader();
 
 	void LoadTexture(const char *);

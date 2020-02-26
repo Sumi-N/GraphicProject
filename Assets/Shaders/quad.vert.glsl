@@ -11,10 +11,10 @@ layout (std140, binding = 1) uniform const_drawcall
 	mat4 model_inverse_transpose_matrix;
 };
 
-out vec2 texcoord;
+out vec4 clipcoord;
 
 void main()
 {
-	texcoord    = model_texcoord;
-	gl_Position = model_view_perspective_matrix * vec4(model_position, 1);
+	clipcoord   = model_view_perspective_matrix * vec4(model_position, 1);
+	gl_Position = clipcoord;
 }
