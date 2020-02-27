@@ -37,6 +37,7 @@ DataGameToRender * datarenderown = &datagametorender[1];
 
 extern Camera camera;
 extern Object teapot;
+extern Object plane;
 extern AmbientLight ambientlight;
 extern PointLight pointlight;
 extern Quad quad;
@@ -118,25 +119,45 @@ void RenderThread::Init()
 
 	////////////////////// Separate the content below later ///////////////////////
 
-			// Initialize objects
-	Mesh* mesh = new Mesh();
-	mesh->Load("../Assets/Meshes/teapot.obj");
-	mesh->Init();
+	// Initialize teapot
+	{
+		Mesh* mesh = new Mesh();
+		mesh->Load("../Assets/Meshes/teapot.obj");
+		mesh->Init();
 
-	Material* material = new Material();
-	material->LoadShader("../Assets/Shaders/blinn_phong.vert.glsl", "../Assets/Shaders/blinn_phong.frag.glsl");
+		Material* material = new Material();
+		material->LoadShader("../Assets/Shaders/blinn_phong.vert.glsl", "../Assets/Shaders/blinn_phong.frag.glsl");
 
-	teapot.SetMesh(mesh);
-	mesh->SetMaterial(material);
+		teapot.SetMesh(mesh);
+		mesh->SetMaterial(material);
 
-	teapot.mesh->material->LoadTexture("../Assets/Textures/brick.png");
-	teapot.mesh->material->LoadTexture("../Assets/Textures/brick-specular.png");
+		teapot.mesh->material->LoadTexture("../Assets/Textures/brick.png");
+		teapot.mesh->material->LoadTexture("../Assets/Textures/brick-specular.png");
+	}
+
+	// Initialize plane
+	{
+		Mesh* mesh = new Mesh();
+		mesh->Load("../Assets/Meshes/plane.obj");
+		mesh->Init();
+
+		Material* material = new Material();
+		material->LoadShader("../Assets/Shaders/blinn_phong.vert.glsl", "../Assets/Shaders/blinn_phong.frag.glsl");
+
+		plane.SetMesh(mesh);
+		mesh->SetMaterial(material);
+	}
 
 	// Setting up quad;
 	quad.Init();
-	quad.pos = glm::vec3(0, -7, -50);
+	quad.pos = glm::vec3(0, 10, -70);
 	quad.scale = glm::vec3(15.0, 15.0, 15.0);
-	quad.rot = glm::vec3(-90, 0, 00);
+	quad.rot = glm::vec3(0, 0, 0);
+
+	// Setting up plane
+	plane.pos = glm::vec3(0, -7, -50);
+	plane.scale = glm::vec3(25.0, 25.0, 25.0);
+	plane.rot = glm::vec3(-90, 0, 0);
 
 	// Setting up position 
 	teapot.pos = glm::vec3(0, -5, -50);
@@ -146,7 +167,7 @@ void RenderThread::Init()
 	// Setup Light
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
-	pointlight.position = glm::vec3(0, 0, -20);
+	pointlight.position = glm::vec3(20, 20, -35);
 
 	// Setting up environment map
 	cubemap.Init();
@@ -173,6 +194,8 @@ void RenderThread::Run()
 		}
 
 		Input::ClearInput();
+
+		// Rendering Part
 		{
 			// Update uniform data common for frame
 			// Submit Camera Information
@@ -206,8 +229,8 @@ void RenderThread::Run()
 					auto & const_data_material = datarenderown->const_material[i];
 					buffer_material.Update(&const_data_material);
 
-					datarenderown->objectlist[i]->mesh->material->BindSkyBox(cubemap);
 					datarenderown->objectlist[i]->mesh->material->BindShader();
+					datarenderown->objectlist[i]->mesh->material->BindSkyBox(cubemap);
 					datarenderown->objectlist[i]->mesh->Draw();
 				}
 			}
@@ -236,8 +259,8 @@ void RenderThread::Run()
 					auto & const_data_material = datarenderown->const_material[i];
 					buffer_material.Update(&const_data_material);
 
-					datarenderown->objectlist[i]->mesh->material->BindSkyBox(cubemap);
 					datarenderown->objectlist[i]->mesh->material->BindShader();
+					datarenderown->objectlist[i]->mesh->material->BindSkyBox(cubemap);
 					datarenderown->objectlist[i]->mesh->Draw();
 				}
 
@@ -278,8 +301,8 @@ void RenderThread::SubmitObjectData(Object * obj)
 	datagameown->const_model.push_back(model);
 
 	ConstantData::Material material;
-	material.specular = glm::vec4(obj->mesh->material->Ks[0], obj->mesh->material->Ks[1], obj->mesh->material->Ks[2], obj->mesh->material->Ns);
-	material.diffuse = glm::vec4(obj->mesh->material->Kd[0], obj->mesh->material->Kd[1], obj->mesh->material->Kd[2], 1.0);
+	material.specular = glm::vec4(obj->mesh->material->Ks, obj->mesh->material->Ns);
+	material.diffuse = glm::vec4(obj->mesh->material->Kd, 1.0);
 	datagameown->const_material.push_back(material);
 }
 

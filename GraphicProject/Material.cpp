@@ -71,7 +71,6 @@ void Material::LoadShader(const char * vert, const char * frag)
 	}
 	//glDeleteProgram(programid);
 
-
 	// Get uniform cubemap texture skybox
 	uniformid_skybox = glGetUniformLocation(programid, "skybox");
 	if (uniformid_skybox == -1)

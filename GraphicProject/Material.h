@@ -10,10 +10,10 @@
 class Material
 {
 public:
-	float Ka[3];  //!< Ambient  color
-	float Kd[3];  //!< Diffuse  color
-	float Ks[3];  //!< Specular color
-	float Ns;     //!< Specular exponent
+	glm::vec3 Ka = glm::vec3(1.0, 1.0, 1.0); //!< Ambient  color
+	glm::vec3 Kd = glm::vec3(1.0, 1.0, 1.0); //!< Diffuse  color
+	glm::vec3 Ks = glm::vec3(1.0, 1.0, 1.0); //!< Specular color
+	float Ns = 0.0f;	                     //!< Specular exponent
 
 	// Functions for openGL
 public:

@@ -106,6 +106,9 @@ public:
 		}
 	};
 
+public:
+	Mtl     *m;		//!< materials
+
 protected:
 	Point3f *v;		//!< vertices
 	TriFace *f;		//!< faces
@@ -113,7 +116,6 @@ protected:
 	TriFace *fn;	//!< normal faces
 	Point3f *vt;	//!< texture vertices
 	TriFace *ft;	//!< texture faces
-	Mtl     *m;		//!< materials
 	int     *mcfc;	//!< material cumulative face count
 
 	unsigned int nv;	//!< number of vertices

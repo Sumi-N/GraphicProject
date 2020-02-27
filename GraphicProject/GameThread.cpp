@@ -24,6 +24,7 @@ DataRenderToGame * BeginReadByGameThread = &datarendertogame[1];
 
 Camera camera;
 Object teapot;
+Object plane;
 AmbientLight ambientlight;
 PointLight pointlight;
 Quad quad;
@@ -95,6 +96,7 @@ void GameThread::Run()
 		timer.Run();
 		teapot.Update(timer.time.dt);
 		quad.Update(timer.time.dt);
+		plane.Update(timer.time.dt);
 		camera.Update(timer.time.dt);
 
 		{
@@ -104,8 +106,9 @@ void GameThread::Run()
 
 			{
 				// Submit data in this scope
-				renderthread.SubmitObjectData(&teapot);
+				//renderthread.SubmitObjectData(&teapot);
 				renderthread.SubmitImageData(&quad);
+				renderthread.SubmitObjectData(&plane);
 				renderthread.SubmitCameraData(&camera);
 				renderthread.SubmitLightingData();
 			}

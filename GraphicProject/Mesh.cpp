@@ -64,12 +64,12 @@ void Mesh::SetMaterial(Material * material)
 		this->material = material;
 
 		// Set material info
-		material->Ns = tmpdata.M(0).Ns;
-		for (int i = 0; i < 3; i++)
+		if (tmpdata.m)
 		{
-			material->Ka[i] = tmpdata.M(0).Ka[i];
-			material->Kd[i] = tmpdata.M(0).Kd[i];
-			material->Ks[i] = tmpdata.M(0).Ks[i];
+			material->Ns = tmpdata.M(0).Ns;
+			material->Ka = glm::vec3(tmpdata.M(0).Ka[0], tmpdata.M(0).Ka[1], tmpdata.M(0).Ka[2]);
+			material->Kd = glm::vec3(tmpdata.M(0).Kd[0], tmpdata.M(0).Kd[1], tmpdata.M(0).Kd[2]);
+			material->Ks = glm::vec3(tmpdata.M(0).Ks[0], tmpdata.M(0).Ks[1], tmpdata.M(0).Ks[2]);
 		}
 	}
 }
