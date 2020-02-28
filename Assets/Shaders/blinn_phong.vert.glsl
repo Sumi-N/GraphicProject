@@ -9,7 +9,7 @@ layout (std140, binding = 0) uniform const_camera
 	mat4 view_matrix;
 	mat4 perspective_matrix;
 	vec3 camera_position_vector;
-	float padding;
+	float camera_padding;
 };
 
 layout (std140, binding = 1) uniform const_object
@@ -24,6 +24,8 @@ layout (std140, binding = 3) uniform const_light
 	vec4 light_ambient_intensity;
 	vec4 light_point_intensity;
 	vec4 light_point_position;
+	vec4 light_padding;
+	mat4 light_view_perspective_matrix;
 };
 
 // Normal vector of the object at world coordinate

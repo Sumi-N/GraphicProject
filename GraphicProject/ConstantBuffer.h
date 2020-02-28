@@ -34,7 +34,9 @@ namespace ConstantData
 	{
 		glm::vec4 light_ambient_intensity;
 		glm::vec4 light_point_intensity;
-		glm::vec4 pointposition;
+		glm::vec4 light_point_position;
+		glm::vec4 padding;
+		glm::mat4 light_view_perspective_matrix;
 	};
 
 	struct Image

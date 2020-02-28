@@ -21,7 +21,7 @@ public:
 	void InitCubeMap(int unitnum, GLint programid, const char ** filenames);
 	void BindTexture();
 
-	void CreateTexture(GLint internalformat, GLuint width, GLuint height);
+	void CreateTexture(GLint internalformat, GLuint width, GLuint height, GLenum type);
 
 	std::string uniformname;
 	GLuint textureid;

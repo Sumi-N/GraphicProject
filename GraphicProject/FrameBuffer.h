@@ -19,6 +19,6 @@ public:
 	GLsizei width;
 	GLsizei height;
 
-	void Init(int width, int height);
+	void Init(int width, int height, GLenum type);
 };
 

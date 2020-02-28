@@ -13,6 +13,8 @@ layout (std140, binding = 3) uniform const_light
 	vec4 light_ambient_intensity;
 	vec4 light_point_intensity;
 	vec4 light_point_position;
+	vec4 light_padding;
+	mat4 light_view_perspective_matrix;
 };
 
 uniform sampler2D texture0;

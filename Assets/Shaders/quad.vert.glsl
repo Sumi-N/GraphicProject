@@ -12,9 +12,13 @@ layout (std140, binding = 1) uniform const_drawcall
 };
 
 out vec4 clipcoord;
+out vec2 texcoord;
 
 void main()
 {
-	clipcoord   = model_view_perspective_matrix * vec4(model_position, 1);
-	gl_Position = clipcoord;
+	// clipcoord   = model_view_perspective_matrix * vec4(model_position, 1);
+	// gl_Position = clipcoord;
+
+	gl_Position = model_view_perspective_matrix * vec4(model_position, 1);
+	texcoord    = model_texcoord;
 }

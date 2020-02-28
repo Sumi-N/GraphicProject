@@ -11,7 +11,7 @@ FrameBuffer::~FrameBuffer()
 {
 }
 
-void FrameBuffer::Init(int width, int height)
+void FrameBuffer::Init(int width, int height, GLenum type)
 {
 	this->width = width;
 	this->height = height;
@@ -21,9 +21,9 @@ void FrameBuffer::Init(int width, int height)
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferid);
 
 	// Create color buffer
-	color.CreateTexture(GL_RGBA, width, height);
+	color.CreateTexture(GL_RGBA, width, height, type);
 	// Create depth buffer
-	depth.CreateTexture(GL_DEPTH_COMPONENT, width, height);
+	depth.CreateTexture(GL_DEPTH_COMPONENT, width, height, type);
 
 	// bind textures to framebuffer
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, color.textureid, 0);

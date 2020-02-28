@@ -50,6 +50,12 @@ ConstantBuffer buffer_light;
 ConstantBuffer buffer_image;
 FrameBuffer framebuffer;
 
+/////////////////
+GLuint depthMapFBO;
+GLuint depthMap;
+Material shader_shadow;
+glm::mat4 lightspacematrix;
+
 void RenderThread::Init()
 {
 	// Initialize GLFW
@@ -114,8 +120,35 @@ void RenderThread::Init()
 	buffer_image.Init(ConstantData::Index::Image, ConstantData::Size::Image);
 
 	// Instantiate framebuffer
-	framebuffer.Init(WIDTH, HEIGHT);
+	framebuffer.Init(WIDTH, HEIGHT, GL_UNSIGNED_BYTE);
 
+	// Shadow
+	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	glGenFramebuffers(1, &depthMapFBO);
+	// create depth texture
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// attach depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{  //Check for FBO completeness
+		std::cout << "Error! FrameBuffer is not complete" << std::endl;
+		std::cin.get();
+		std::terminate();
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	shader_shadow.LoadShader("../Assets/Shaders/shadowmap.vert.glsl", "../Assets/Shaders/shadowmap.frag.glsl");
 
 	////////////////////// Separate the content below later ///////////////////////
 
@@ -159,7 +192,7 @@ void RenderThread::Init()
 	plane.scale = glm::vec3(25.0, 25.0, 25.0);
 	plane.rot = glm::vec3(-90, 0, 0);
 
-	// Setting up position 
+	// Setting up teapot
 	teapot.pos = glm::vec3(0, -5, -50);
 	teapot.scale = glm::vec3(1.0, 1.0, 1.0);
 	teapot.rot = glm::vec3(-90, 0, 0);
@@ -167,10 +200,16 @@ void RenderThread::Init()
 	// Setup Light
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
-	pointlight.position = glm::vec3(20, 20, -35);
+	pointlight.pos = glm::vec3(0, 20, -50);
 
 	// Setting up environment map
 	cubemap.Init();
+
+	// Light things
+	float near_plane = 0.1f, far_plane = 100.0f;
+	glm::mat4 lightprojection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+	glm::mat4 lightview = glm::lookAt(glm::vec3(0, 20, -50), glm::vec3(0, 10, -50), glm::vec3(0, 0, -10));
+	lightspacematrix = lightprojection * lightview;
 }
 
 void RenderThread::Run()
@@ -204,6 +243,23 @@ void RenderThread::Run()
 			// Submit Light Information
 			auto & const_data_light = datarenderown->const_light;
 			buffer_light.Update(&const_data_light);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+			{
+				glClear(GL_DEPTH_BUFFER_BIT);
+
+				// Rendering Objects
+				for (int i = 0; i < datarenderown->objectlist.size(); i++)
+				{
+					auto & const_data_draw = datarenderown->const_model[i];
+					const_data_draw.model_view_perspective_matrix = const_data_light.light_view_perspective_matrix * const_data_draw.model_position_matrix;
+					buffer_mesh.Update(&const_data_draw);
+
+					glUseProgram(shader_shadow.programid);
+
+					datarenderown->objectlist[i]->mesh->Draw();
+				}
+			}
 
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.bufferid);
 			{
@@ -239,31 +295,6 @@ void RenderThread::Run()
 			{
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-				// Rendering Background
-				{
-					glDepthMask(GL_FALSE);
-					cubemap.vp = const_data_camera.perspective_matrix * glm::mat4(glm::mat3(const_data_camera.view_matrix));
-					cubemap.Bind();
-					cubemap.mesh->Draw();
-					glDepthMask(GL_TRUE);
-				}
-
-				
-				// Rendering Objects
-				for (int i = 0; i < datarenderown->objectlist.size(); i++)
-				{
-					auto & const_data_draw = datarenderown->const_model[i];
-					const_data_draw.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * const_data_draw.model_position_matrix;
-					buffer_mesh.Update(&const_data_draw);
-
-					auto & const_data_material = datarenderown->const_material[i];
-					buffer_material.Update(&const_data_material);
-
-					datarenderown->objectlist[i]->mesh->material->BindShader();
-					datarenderown->objectlist[i]->mesh->material->BindSkyBox(cubemap);
-					datarenderown->objectlist[i]->mesh->Draw();
-				}
-
 				// Render Mirror Image
 				{
 					for (int i = 0; i < datarenderown->imagelist.size(); i++)
@@ -273,11 +304,61 @@ void RenderThread::Run()
 						buffer_mesh.Update(&const_data_model);
 
 						// This part need to change later
-						quad.Bind(framebuffer);
+						//quad.Bind(framebuffer);
+
+						glUseProgram(quad.mesh->material->programid);
+						glActiveTexture(GL_TEXTURE0);
+						glBindTexture(GL_TEXTURE_2D, depthMap);
+						glUniform1i(glGetUniformLocation(quad.mesh->material->programid, "texture0"), 0);
+
 						datarenderown->imagelist[i]->mesh->Draw();
 					}
 				}
 			}
+
+			//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			//{
+			//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+			//	// Rendering Background
+			//	{
+			//		glDepthMask(GL_FALSE);
+			//		cubemap.vp = const_data_camera.perspective_matrix * glm::mat4(glm::mat3(const_data_camera.view_matrix));
+			//		cubemap.Bind();
+			//		cubemap.mesh->Draw();
+			//		glDepthMask(GL_TRUE);
+			//	}
+
+			//	
+			//	// Rendering Objects
+			//	for (int i = 0; i < datarenderown->objectlist.size(); i++)
+			//	{
+			//		auto & const_data_draw = datarenderown->const_model[i];
+			//		const_data_draw.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * const_data_draw.model_position_matrix;
+			//		buffer_mesh.Update(&const_data_draw);
+
+			//		auto & const_data_material = datarenderown->const_material[i];
+			//		buffer_material.Update(&const_data_material);
+
+			//		datarenderown->objectlist[i]->mesh->material->BindShader();
+			//		datarenderown->objectlist[i]->mesh->material->BindSkyBox(cubemap);
+			//		datarenderown->objectlist[i]->mesh->Draw();
+			//	}
+
+			//	// Render Mirror Image
+			//	{
+			//		for (int i = 0; i < datarenderown->imagelist.size(); i++)
+			//		{
+			//			auto & const_data_model = datarenderown->const_image_model[i];
+			//			const_data_model.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * const_data_model.model_position_matrix;
+			//			buffer_mesh.Update(&const_data_model);
+
+			//			// This part need to change later
+			//			quad.Bind(framebuffer);
+			//			datarenderown->imagelist[i]->mesh->Draw();
+			//		}
+			//	}
+			//}
 		}
 
 		glfwSwapBuffers(window);
@@ -334,5 +415,6 @@ void RenderThread::SubmitLightingData()
 {
 	datagameown->const_light.light_ambient_intensity = glm::vec4(ambientlight.intensity, 1.0);
 	datagameown->const_light.light_point_intensity = glm::vec4(pointlight.intensity, 1.0);
-	datagameown->const_light.pointposition = glm::vec4(pointlight.position, 0.0);
+	datagameown->const_light.light_point_position = glm::vec4(pointlight.pos, 0.0);
+	datagameown->const_light.light_view_perspective_matrix = lightspacematrix;
 }

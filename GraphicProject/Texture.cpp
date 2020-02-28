@@ -115,7 +115,7 @@ void Texture::BindTexture()
 	glUniform1i(uniformid, unitnumber);
 }
 
-void Texture::CreateTexture(GLint internalformat, GLuint width, GLuint height)
+void Texture::CreateTexture(GLint internalformat, GLuint width, GLuint height, GLenum type)
 {
 	this->width = width;
 	this->height = height;
@@ -123,7 +123,7 @@ void Texture::CreateTexture(GLint internalformat, GLuint width, GLuint height)
 	glGenTextures(1, &textureid);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureid);
-	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, internalformat, GL_UNSIGNED_BYTE, data.data());
+	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, internalformat, type, data.data());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
