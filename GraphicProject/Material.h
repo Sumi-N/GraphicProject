@@ -23,7 +23,6 @@ public:
 
 	void LoadShader(const char * vert, const char * frag);
 	void BindSkyBox(class CubeMap);
-	void BindShadowMap();
 	void BindShader();
 
 	void LoadTexture(const char *);

@@ -87,11 +87,6 @@ void Material::BindSkyBox(CubeMap cubemap)
 	glUniform1i(uniformid_skybox, cubetexture->unitnumber);
 }
 
-void Material::BindShadowMap()
-{
-
-}
-
 void Material::BindShader()
 {
 	glUseProgram(programid);

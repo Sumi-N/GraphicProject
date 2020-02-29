@@ -106,9 +106,9 @@ void GameThread::Run()
 
 			{
 				// Submit data in this scope
+				renderthread.SubmitObjectData(&plane);
 				renderthread.SubmitObjectData(&teapot);
 				renderthread.SubmitImageData(&quad);
-				renderthread.SubmitObjectData(&plane);
 				renderthread.SubmitCameraData(&camera);
 				renderthread.SubmitLightingData();
 			}

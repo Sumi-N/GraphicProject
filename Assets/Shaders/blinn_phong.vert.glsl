@@ -36,6 +36,8 @@ out vec3 world_pointlight_direction;
 out vec3 world_object_direction;
 // Texture coordinate
 out vec2 texcoord;
+// The depth value at light space
+out vec4 light_space_position_depth;
 
 void main()
 {
@@ -49,4 +51,6 @@ void main()
 	world_object_direction     = normalize(camera_position_vector -  vec3(model_position_matrix * vec4(model_position, 1)));
 
 	texcoord                   = model_texcoord;
+
+	light_space_position_depth = light_view_perspective_matrix * model_position_matrix * vec4(model_position, 1.0);
 }

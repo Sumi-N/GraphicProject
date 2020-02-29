@@ -3,6 +3,7 @@
 layout(location = 0) out vec4 color;
 
 uniform sampler2D texture0;
+uniform samplerCube skybox;
 
 in vec4 clipcoord;
 in vec2 texcoord;

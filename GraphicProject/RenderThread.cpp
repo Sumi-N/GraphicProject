@@ -131,8 +131,8 @@ void RenderThread::Init()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	// attach depth texture as FBO's depth buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
@@ -208,7 +208,7 @@ void RenderThread::Init()
 	// Light things
 	float near_plane = 0.1f, far_plane = 100.0f;
 	glm::mat4 lightprojection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-	glm::mat4 lightview = glm::lookAt(glm::vec3(0, 20, -50), glm::vec3(0, 10, -50), glm::vec3(0, 0, -10));
+	glm::mat4 lightview = glm::lookAt(glm::vec3(0, 20, -50), glm::vec3(0, 10, -50), glm::vec3(0, 0, 1));
 	lightspacematrix = lightprojection * lightview;
 }
 
@@ -295,7 +295,42 @@ void RenderThread::Run()
 			{
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-				// Render Mirror Image
+				// Rendering Background
+				{
+					glDepthMask(GL_FALSE);
+					cubemap.vp = const_data_camera.perspective_matrix * glm::mat4(glm::mat3(const_data_camera.view_matrix));
+					cubemap.Bind();
+					cubemap.mesh->Draw();
+					glDepthMask(GL_TRUE);
+				}
+
+				
+				// Rendering Objects
+				for (int i = 0; i < datarenderown->objectlist.size(); i++)
+				{
+					auto & const_data_draw = datarenderown->const_model[i];
+					const_data_draw.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * const_data_draw.model_position_matrix;
+					buffer_mesh.Update(&const_data_draw);
+
+					auto & const_data_material = datarenderown->const_material[i];
+					buffer_material.Update(&const_data_material);
+
+					datarenderown->objectlist[i]->mesh->material->BindShader();
+					datarenderown->objectlist[i]->mesh->material->BindSkyBox(cubemap);
+
+					GLuint shadowmap = glGetUniformLocation(datarenderown->objectlist[i]->mesh->material->programid, "shadowmap");
+					if (shadowmap == -1)
+					{
+						std::cerr << "Cannot get shadow map uniform id" << std::endl;
+					}
+					glActiveTexture(GL_TEXTURE0 + 4);
+					glBindTexture(GL_TEXTURE_2D, depthMap);
+					glUniform1i(shadowmap, 4);
+
+					datarenderown->objectlist[i]->mesh->Draw();
+				}
+
+				//Render Mirror Image
 				{
 					for (int i = 0; i < datarenderown->imagelist.size(); i++)
 					{
@@ -315,50 +350,6 @@ void RenderThread::Run()
 					}
 				}
 			}
-
-			//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			//{
-			//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-			//	// Rendering Background
-			//	{
-			//		glDepthMask(GL_FALSE);
-			//		cubemap.vp = const_data_camera.perspective_matrix * glm::mat4(glm::mat3(const_data_camera.view_matrix));
-			//		cubemap.Bind();
-			//		cubemap.mesh->Draw();
-			//		glDepthMask(GL_TRUE);
-			//	}
-
-			//	
-			//	// Rendering Objects
-			//	for (int i = 0; i < datarenderown->objectlist.size(); i++)
-			//	{
-			//		auto & const_data_draw = datarenderown->const_model[i];
-			//		const_data_draw.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * const_data_draw.model_position_matrix;
-			//		buffer_mesh.Update(&const_data_draw);
-
-			//		auto & const_data_material = datarenderown->const_material[i];
-			//		buffer_material.Update(&const_data_material);
-
-			//		datarenderown->objectlist[i]->mesh->material->BindShader();
-			//		datarenderown->objectlist[i]->mesh->material->BindSkyBox(cubemap);
-			//		datarenderown->objectlist[i]->mesh->Draw();
-			//	}
-
-			//	// Render Mirror Image
-			//	{
-			//		for (int i = 0; i < datarenderown->imagelist.size(); i++)
-			//		{
-			//			auto & const_data_model = datarenderown->const_image_model[i];
-			//			const_data_model.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * const_data_model.model_position_matrix;
-			//			buffer_mesh.Update(&const_data_model);
-
-			//			// This part need to change later
-			//			quad.Bind(framebuffer);
-			//			datarenderown->imagelist[i]->mesh->Draw();
-			//		}
-			//	}
-			//}
 		}
 
 		glfwSwapBuffers(window);

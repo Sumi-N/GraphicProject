@@ -20,6 +20,7 @@ layout (std140, binding = 3) uniform const_light
 uniform sampler2D texture0;
 uniform sampler2D texture1;
 uniform samplerCube skybox;
+uniform sampler2D shadowmap;
 
 // Normal vector of the object at world coordinate
 in vec3 world_normal;
@@ -29,11 +30,34 @@ in vec3 world_pointlight_direction;
 in vec3 world_object_direction;
 // Texture coordinate
 in vec2 texcoord;
+// The depth value at light space
+in vec4 light_space_position_depth;
+
+bool ShadowCalculation(vec4 fragPosLightSpace)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(shadowmap, projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+    return  currentDepth > closestDepth  ? true : false;
+} 
 
 void main()
 {
 	// Ambient light
-	color = texture2D(texture0, texcoord.st) * diffuse * light_ambient_intensity;
+	//color = texture2D(texture0, texcoord.st) * diffuse * light_ambient_intensity;
+
+	if(ShadowCalculation(light_space_position_depth))
+	{
+		return;
+	}
+
+	color = diffuse;
 
 	float cos_theta_1 = dot(world_normal, world_pointlight_direction);
 	
