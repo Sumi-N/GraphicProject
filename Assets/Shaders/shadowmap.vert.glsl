@@ -21,4 +21,5 @@ layout (std140, binding = 3) uniform const_light
 void main()
 {
     gl_Position = light_view_perspective_matrix * model_position_matrix * vec4(model_position, 1.0);
+    //gl_Position = light_view_perspective_matrix * vec4(model_position, 1.0);
 }

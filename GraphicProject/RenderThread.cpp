@@ -123,7 +123,7 @@ void RenderThread::Init()
 	framebuffer.Init(WIDTH, HEIGHT, GL_UNSIGNED_BYTE);
 
 	// Shadow
-	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	const unsigned int SHADOW_WIDTH = WIDTH, SHADOW_HEIGHT = HEIGHT;
 	glGenFramebuffers(1, &depthMapFBO);
 	// create depth texture
 	glGenTextures(1, &depthMap);
@@ -207,8 +207,9 @@ void RenderThread::Init()
 
 	// Light things
 	float near_plane = 0.1f, far_plane = 100.0f;
-	glm::mat4 lightprojection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-	glm::mat4 lightview = glm::lookAt(glm::vec3(0, 20, -50), glm::vec3(0, 10, -50), glm::vec3(0, 0, 1));
+	glm::mat4 lightprojection = glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, near_plane, far_plane);
+	//glm::mat4 lightprojection = glm::perspective(glm::radians(45.0f), (float)WIDTH / HEIGHT, near_plane, far_plane);
+	glm::mat4 lightview = glm::lookAt(pointlight.pos, pointlight.pos + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1));
 	lightspacematrix = lightprojection * lightview;
 }
 
@@ -280,6 +281,7 @@ void RenderThread::Run()
 
 					// Instead of getting mvp, gets mirror image
 					const_data_draw.model_view_perspective_matrix = const_data_camera.perspective_matrix * const_data_camera.view_matrix * datarenderown->const_image.mirror_matrix * const_data_draw.model_position_matrix;
+					//const_data_draw.model_view_perspective_matrix = const_data_light.light_view_perspective_matrix * const_data_draw.model_position_matrix;
 					buffer_mesh.Update(&const_data_draw);
 
 					auto & const_data_material = datarenderown->const_material[i];
