@@ -200,16 +200,16 @@ void RenderThread::Init()
 	// Setup Light
 	ambientlight.intensity = glm::vec3(0.1, 0.1, 0.1);
 	pointlight.intensity = glm::vec3(1.0, 1.0, 1.0);
-	pointlight.pos = glm::vec3(0, 20, -50);
+	pointlight.pos = glm::vec3(20, 20, -50);
 
 	// Setting up environment map
 	cubemap.Init();
 
 	// Light things
 	float near_plane = 0.1f, far_plane = 100.0f;
-	glm::mat4 lightprojection = glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, near_plane, far_plane);
+	glm::mat4 lightprojection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 	//glm::mat4 lightprojection = glm::perspective(glm::radians(45.0f), (float)WIDTH / HEIGHT, near_plane, far_plane);
-	glm::mat4 lightview = glm::lookAt(pointlight.pos, pointlight.pos + glm::vec3(0, -1, 0), glm::vec3(0, 0, 1));
+	glm::mat4 lightview = glm::lookAt(pointlight.pos, glm::vec3(0, 0, -50), glm::vec3(20, -20, 0));
 	lightspacematrix = lightprojection * lightview;
 }
 

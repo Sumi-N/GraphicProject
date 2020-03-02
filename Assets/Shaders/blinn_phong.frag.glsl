@@ -51,13 +51,12 @@ void main()
 {
 	// Ambient light
 	//color = texture2D(texture0, texcoord.st) * diffuse * light_ambient_intensity;
+	color = diffuse * light_ambient_intensity;
 
 	if(ShadowCalculation(light_space_position_depth))
 	{
 		return;
 	}
-
-	color = diffuse;
 
 	float cos_theta_1 = dot(world_normal, world_pointlight_direction);
 	
